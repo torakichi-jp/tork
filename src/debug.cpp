@@ -1,9 +1,16 @@
-﻿#include <tork/debug.h>
+﻿//******************************************************************************
+//
+// デバッグ用関数など
+//
+//******************************************************************************
+
+#include <tork/debug.h>
 #include <cstdio>
 #include <cstdarg>
 
 namespace {
 
+    // メッセージ用のバッファを取得して書き込んで返す
     char* GetDbgMsgBuffer(const char* msg, va_list args)
     {
         int len = _vscprintf(msg, args) + 1;
@@ -14,8 +21,12 @@ namespace {
 
 }   // anonymous namespace
 
+
 namespace tork {
 
+// デバッグトレース
+// printf() と同じ書式が使える
+// OutputDebugString() を利用して出力
 void DbgTrace(const char* msg, ...)
 {
     va_list args;
@@ -28,6 +39,9 @@ void DbgTrace(const char* msg, ...)
     delete[] pBuffer;
 }
 
+// デバッグボックス
+// printf() と同じ書式が使える
+// MessageBox() を利用して出力
 void DbgBox(const char* msg, ...)
 {
     va_list args;
@@ -43,12 +57,17 @@ void DbgBox(const char* msg, ...)
 
 // MemoryLeakDetection
 
+// コンストラクタ
+// pFile:   リーク検出時に表示するファイル名
+// line:    リーク検出時に表示する行番号
+// isBreak: リーク検出時にブレークするかどうか
 MemoryLeakDetection::MemoryLeakDetection(const char* pFile, int line, bool isBreak)
 {
     is_break_ = isBreak;
     checkpoint(pFile, line);
 }
 
+// デストラクタ
 MemoryLeakDetection::~MemoryLeakDetection()
 {
     dump();
@@ -67,8 +86,13 @@ void MemoryLeakDetection::dump() const
 {
     _CrtMemState stateNow;
     _CrtMemState stateDiff;
+
+    // 現在のチェックポイントとの差分を取得
     _CrtMemCheckpoint(&stateNow);
     _CrtMemDifference(&stateDiff, &mem_state_, &stateNow);
+
+    // ノーマルブロックかクライアントブロックの数が0より大きければ、
+    // リークが起きている
     if (stateDiff.lCounts[_NORMAL_BLOCK] > 0 || stateDiff.lCounts[_CLIENT_BLOCK] > 0) {
         if (is_break_) {
             DebugBox("Memory Leak Detected!!");
@@ -83,3 +107,4 @@ void MemoryLeakDetection::dump() const
 }
 
 }   // namespace tork
+

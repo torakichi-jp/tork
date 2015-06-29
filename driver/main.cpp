@@ -2,7 +2,7 @@
 #include <tork.h>
 using namespace std;
 
-DebugDetectMemoryLeak();
+DebugDetectMemoryLeak(global_memory_leak_detection);
 
 
 int main()
@@ -12,6 +12,8 @@ int main()
     cout << sizeof(opint) << endl;
 
     DebugPrint("テスト\n");
+
+    new int;
 
     return 0;
 }
