@@ -13,7 +13,5 @@ int main()
 
     DebugPrint("テスト\n");
 
-    new int;
-
     return 0;
 }

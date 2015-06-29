@@ -10,10 +10,11 @@
 
 namespace {
 
-    // メッセージ用のバッファを取得して書き込んで返す
-    char* GetDbgMsgBuffer(const char* msg, va_list args)
+    // メッセージ用のバッファを取得して、メッセージを書き込んで返す
+    // 使い終わったら delete[] すること
+    char* GetDbgMsgString(const char* msg, va_list args)
     {
-        int len = _vscprintf(msg, args) + 1;
+        int len = _vscprintf(msg, args) + 1;    // +1はヌル文字分
         char* pBuffer = T_NEW char[len];
         vsprintf_s(pBuffer, len, msg, args);
         return pBuffer;
@@ -31,12 +32,12 @@ void DbgTrace(const char* msg, ...)
 {
     va_list args;
     va_start(args, msg);
-    char* pBuffer = GetDbgMsgBuffer(msg, args);
+    char* pMsg = GetDbgMsgString(msg, args);
     va_end(args);
 
-    ::OutputDebugStringA(pBuffer);
+    ::OutputDebugStringA(pMsg);
 
-    delete[] pBuffer;
+    delete[] pMsg;
 }
 
 // デバッグボックス
@@ -46,12 +47,12 @@ void DbgBox(const char* msg, ...)
 {
     va_list args;
     va_start(args, msg);
-    char* pBuffer = GetDbgMsgBuffer(msg, args);
+    char* pMsg = GetDbgMsgString(msg, args);
     va_end(args);
 
-    ::MessageBoxA(nullptr, pBuffer, "tork::DbgBox", MB_OK | MB_ICONINFORMATION);
+    ::MessageBoxA(nullptr, pMsg, "tork::DbgBox", MB_OK | MB_ICONINFORMATION);
 
-    delete[] pBuffer;
+    delete[] pMsg;
 }
 
 
