@@ -13,7 +13,10 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="ヘッダー ファイル\utility">
+    <Filter Include="ヘッダー ファイル\tork">
+      <UniqueIdentifier>{bb8a9d54-867e-48ce-ba0f-65ba374b4d6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\tork\utility">
       <UniqueIdentifier>{5f0bfdce-ccad-4ea5-bc9e-f50d1bdd9039}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -25,16 +28,19 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="..\include\tork\utility\include.h">
-      <Filter>ヘッダー ファイル\utility</Filter>
+      <Filter>ヘッダー ファイル\tork\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\include\tork\utility\optional.h">
-      <Filter>ヘッダー ファイル\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\tork\debug.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>ヘッダー ファイル\tork\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\include\tork.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tork\debug.h">
+      <Filter>ヘッダー ファイル\tork</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tork\pointer.h">
+      <Filter>ヘッダー ファイル\tork</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

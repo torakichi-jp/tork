@@ -93,6 +93,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\tork.h" />
     <ClInclude Include="..\include\tork\debug.h" />
+    <ClInclude Include="..\include\tork\pointer.h" />
     <ClInclude Include="..\include\tork\utility\include.h" />
     <ClInclude Include="..\include\tork\utility\optional.h" />
     <ClInclude Include="stdafx.h" />
