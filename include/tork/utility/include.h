@@ -1,0 +1,7 @@
+﻿#ifndef TORK_UTILITY_INCLUD_H_INCLUDED
+#define TORK_UTILITY_INCLUD_H_INCLUDED
+
+#include "optional.h"
+
+#endif  // TORK_UTILITY_INCLUD_H_INCLUDED
+

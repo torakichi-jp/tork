@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tork", "tork\tork.vcxproj", "{3E0E4322-0D1B-4B99-A32D-4F508F7093FC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{3D6AF60A-0DE9-455C-A1DD-56B71BCF8FE2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3E0E4322-0D1B-4B99-A32D-4F508F7093FC} = {3E0E4322-0D1B-4B99-A32D-4F508F7093FC}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "driver", "driver\driver.vcxproj", "{557D43AC-7CC1-4A11-AB29-DED395AAA20C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3E0E4322-0D1B-4B99-A32D-4F508F7093FC} = {3E0E4322-0D1B-4B99-A32D-4F508F7093FC}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3E0E4322-0D1B-4B99-A32D-4F508F7093FC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3E0E4322-0D1B-4B99-A32D-4F508F7093FC}.Debug|Win32.Build.0 = Debug|Win32
+		{3E0E4322-0D1B-4B99-A32D-4F508F7093FC}.Release|Win32.ActiveCfg = Release|Win32
+		{3E0E4322-0D1B-4B99-A32D-4F508F7093FC}.Release|Win32.Build.0 = Release|Win32
+		{3D6AF60A-0DE9-455C-A1DD-56B71BCF8FE2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3D6AF60A-0DE9-455C-A1DD-56B71BCF8FE2}.Debug|Win32.Build.0 = Debug|Win32
+		{3D6AF60A-0DE9-455C-A1DD-56B71BCF8FE2}.Release|Win32.ActiveCfg = Release|Win32
+		{3D6AF60A-0DE9-455C-A1DD-56B71BCF8FE2}.Release|Win32.Build.0 = Release|Win32
+		{557D43AC-7CC1-4A11-AB29-DED395AAA20C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{557D43AC-7CC1-4A11-AB29-DED395AAA20C}.Debug|Win32.Build.0 = Debug|Win32
+		{557D43AC-7CC1-4A11-AB29-DED395AAA20C}.Release|Win32.ActiveCfg = Release|Win32
+		{557D43AC-7CC1-4A11-AB29-DED395AAA20C}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
