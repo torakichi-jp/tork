@@ -9,12 +9,12 @@ namespace tork {
 
     // ポインタキャスト
     template<class T>
-    inline T* pointer_cast(void* ptr) {
-        return reinterpret_cast<T*>(ptr);
+    inline T pointer_cast(void* ptr) {
+        return static_cast<T>(ptr);
     }
     template<class T>
-    inline const T* pointer_cast(const void* ptr) {
-        return reinterpret_cast<const T*>(ptr);
+    inline T pointer_cast(const void* ptr) {
+        return static_cast<T>(ptr);
     }
 
     // & 演算子が再定義されていてもアドレス取得

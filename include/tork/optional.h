@@ -20,6 +20,7 @@
 #include <ostream>
 #include <cassert>
 #include <type_traits>
+#include <tork/pointer.h>
 
 namespace tork {
 
@@ -81,8 +82,8 @@ public:
     // アクセサ
     T&       get()       { assert(m_valid); return *get_as_ptr(); }
     const T& get() const { assert(m_valid); return *get_as_ptr(); }
-    T*       ptr()       { return &get(); }
-    const T* ptr() const { return &get(); }
+    T*       ptr()       { return address_of(get()); }
+    const T* ptr() const { return address_of(get()); }
     T&       operator *()        { return get(); }
     const T& operator *() const  { return get(); }
     T*       operator ->()       { return &get(); }
@@ -105,13 +106,10 @@ private:
 
     // 保持データへのポインタ取得
     T* get_as_ptr() {
-        void* p = &m_data;
-        return static_cast<T*>(p);
+        return pointer_cast<T*>(&m_data);
     }
-
     const T* get_as_ptr() const {
-        const void* p = &m_data;
-        return static_cast<const T*>(p);
+        return pointer_cast<const T*>(&m_data);
     }
 
     // データ構築

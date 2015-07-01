@@ -16,9 +16,6 @@
     <Filter Include="ヘッダー ファイル\tork">
       <UniqueIdentifier>{bb8a9d54-867e-48ce-ba0f-65ba374b4d6f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ヘッダー ファイル\tork\utility">
-      <UniqueIdentifier>{5f0bfdce-ccad-4ea5-bc9e-f50d1bdd9039}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -27,12 +24,6 @@
     <ClInclude Include="targetver.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\tork\utility\include.h">
-      <Filter>ヘッダー ファイル\tork\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\tork\utility\optional.h">
-      <Filter>ヘッダー ファイル\tork\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\tork.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -40,6 +31,9 @@
       <Filter>ヘッダー ファイル\tork</Filter>
     </ClInclude>
     <ClInclude Include="..\include\tork\pointer.h">
+      <Filter>ヘッダー ファイル\tork</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tork\optional.h">
       <Filter>ヘッダー ファイル\tork</Filter>
     </ClInclude>
   </ItemGroup>

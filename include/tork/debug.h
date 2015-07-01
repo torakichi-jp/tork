@@ -12,7 +12,7 @@ namespace tork {
 
     // メモリリーク検出クラス
     class MemoryLeakDetection {
-        _CrtMemState mem_state_;        // checkpoint() を読んだ時のステータス
+        _CrtMemState mem_state_;        // checkpoint() を呼んだ時のステータス
         const char* p_file_ = nullptr;  // ファイル名
         int line_ = 0;                  // 行番号
         bool is_break_ = true;          // ブレークするかどうか

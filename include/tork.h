@@ -3,8 +3,7 @@
 
 #include "tork/debug.h"
 #include "tork/pointer.h"
-
-#include "tork/utility/include.h"
+#include "tork/optional.h"
 
 namespace tork {
 
