@@ -5,6 +5,8 @@
 #include "tork/pointer.h"
 #include "tork/optional.h"
 
+#include "tork/container.h"
+
 namespace tork {
 
 }   // namespace tork
