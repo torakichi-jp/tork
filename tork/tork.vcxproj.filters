@@ -51,6 +51,12 @@
     <ClInclude Include="..\include\tork\container\Vector.h">
       <Filter>ヘッダー ファイル\tork\container</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\tork\app.h">
+      <Filter>ヘッダー ファイル\tork</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tork\container.h">
+      <Filter>ヘッダー ファイル\tork</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
