@@ -56,6 +56,7 @@ void DbgBox(const char* msg, ...)
 }
 
 
+//------------------------------------------------------------------------------
 // MemoryLeakDetection
 
 // コンストラクタ
@@ -105,6 +106,40 @@ void MemoryLeakDetection::dump() const
     else {
         DebugTrace("No Memory Leaks. Checkpoint:\n%s(%d)\n", p_file_, line_);
     }
+}
+
+//------------------------------------------------------------------------------
+// トレーサ
+
+int Tracer::obj_counter_ = 0;
+
+// コンストラクタ
+Tracer::Tracer()
+    :obj_id_(obj_counter_)
+{
+    obj_counter_++;
+    printf("Construct %d\n", obj_id_);
+}
+
+// コピーコンストラクタ
+Tracer::Tracer(const Tracer&)
+    :obj_id_(obj_counter_)
+{
+    obj_counter_++;
+    printf("Copy Construct %d\n", obj_id_);
+}
+
+// デストラクタ
+Tracer::~Tracer()
+{
+    printf("Destruct %d\n", obj_id_);
+}
+
+// コピー代入演算子
+Tracer& Tracer::operator =(const Tracer&)
+{
+    printf("Copy Assignment %d\n", obj_id_);
+    return *this;
 }
 
 }   // namespace tork

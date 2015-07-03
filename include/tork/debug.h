@@ -32,6 +32,17 @@ namespace tork {
         void dump() const;
 
     };  // class MemoryLeakDetection;
+
+    // 生成時などに文字列を出力する単純なトレーサ
+    class Tracer {
+        static int obj_counter_;
+        int obj_id_;
+    public:
+        Tracer();
+        Tracer(const Tracer&);
+        ~Tracer();
+        Tracer& operator =(const Tracer&);
+    };
 }
 
 
