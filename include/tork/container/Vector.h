@@ -12,9 +12,9 @@
 namespace tork {
 
     // Vector用拡張範囲エラー報告
-    struct RangeError : std::out_of_range {
+    struct OutOfRangeError : std::out_of_range {
         int index;
-        RangeError(int i): std::out_of_range("Range Error"), index(i) { }
+        OutOfRangeError(int i): std::out_of_range("Range Error"), index(i) { }
     };
 
     template<class T>
@@ -29,7 +29,7 @@ namespace tork {
         T& operator[] (size_type i)
         {
             if (i < 0 || this->size() <= i) {
-                throw RangeError(i);
+                throw OutOfRangeError(i);
             }
             return std::vector<T>::operator[](i);
         }
@@ -37,7 +37,7 @@ namespace tork {
         const T& operator[] (size_type i) const
         {
             if (i < 0 || this->size() <= i) {
-                throw RangeError(i);
+                throw OutOfRangeError(i);
             }
             return std::vector<T>::operator[](i);
         }
