@@ -16,6 +16,15 @@
     <Filter Include="ヘッダー ファイル\tork">
       <UniqueIdentifier>{bb8a9d54-867e-48ce-ba0f-65ba374b4d6f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\tork\container">
+      <UniqueIdentifier>{1d66e3a8-3261-4464-94f1-f3ccea659962}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\tork\app">
+      <UniqueIdentifier>{9e50dabc-346b-4b28-b7cd-6ff8c66781fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\app">
+      <UniqueIdentifier>{8f0bde88-240e-4d23-abf8-731801255266}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -36,6 +45,12 @@
     <ClInclude Include="..\include\tork\optional.h">
       <Filter>ヘッダー ファイル\tork</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\tork\app\OptionStream.h">
+      <Filter>ヘッダー ファイル\tork\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tork\container\Vector.h">
+      <Filter>ヘッダー ファイル\tork\container</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -43,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="..\src\debug.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\app\OptionStream.cpp">
+      <Filter>ソース ファイル\app</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
