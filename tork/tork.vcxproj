@@ -97,6 +97,7 @@
     <ClInclude Include="..\include\tork\container.h" />
     <ClInclude Include="..\include\tork\container\Vector.h" />
     <ClInclude Include="..\include\tork\debug.h" />
+    <ClInclude Include="..\include\tork\define.h" />
     <ClInclude Include="..\include\tork\optional.h" />
     <ClInclude Include="..\include\tork\pointer.h" />
     <ClInclude Include="stdafx.h" />

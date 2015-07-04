@@ -57,6 +57,9 @@
     <ClInclude Include="..\include\tork\container.h">
       <Filter>ヘッダー ファイル\tork</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\tork\define.h">
+      <Filter>ヘッダー ファイル\tork</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
