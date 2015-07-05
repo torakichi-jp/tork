@@ -68,7 +68,9 @@ namespace tork {
 
 #define DebugOnly(arg) arg
 #define DebugTrace(msg, ...) tork::DbgTrace(msg, __VA_ARGS__)
+#define DebugTraceLn(msg) DebugTrace("%s\n", msg)
 #define DebugPrint(msg, ...) std::fprintf(stderr, msg, __VA_ARGS__)
+#define DebugPrintLn(msg) DebugPrint("%s\n", msg)
 #define DebugBox(msg, ...) tork::DbgBox(msg, __VA_ARGS__)
 #define DebugBreakIf(cond) (cond ? DebugBreak() : static_cast<void>(0))
 #define DebugDetectMemoryLeak(obj) tork::MemoryLeakDetection obj(__FILE__, __LINE__)
@@ -79,7 +81,9 @@ namespace tork {
 
 #define DebugOnly(arg)
 #define DebugTrace(msg, ...)
+#define DebugTraceLn(msg, ...)
 #define DebugPrint(msg, ...)
+#define DebugPrintLn(msg, ...)
 #define DebugBox(msg, ...)
 #define DebugBreakIf(cond)
 #define DebugDetectMemoryLeak(obj)
