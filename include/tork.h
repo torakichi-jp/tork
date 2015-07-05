@@ -3,7 +3,6 @@
 
 #include "tork/define.h"
 #include "tork/debug.h"
-#include "tork/pointer.h"
 #include "tork/optional.h"
 
 #include "tork/container.h"

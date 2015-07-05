@@ -20,7 +20,7 @@
 #include <ostream>
 #include <cassert>
 #include <type_traits>
-#include <tork/pointer.h>
+#include <tork/define.h>
 
 namespace tork {
 

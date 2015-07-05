@@ -39,9 +39,6 @@
     <ClInclude Include="..\include\tork\debug.h">
       <Filter>ヘッダー ファイル\tork</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\tork\pointer.h">
-      <Filter>ヘッダー ファイル\tork</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\tork\optional.h">
       <Filter>ヘッダー ファイル\tork</Filter>
     </ClInclude>

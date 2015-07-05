@@ -5,13 +5,33 @@
 DebugDetectMemoryLeak(global_memory_leak_detection);
 
 void TestOptionStream();    // OptionStream テスト
+void TestOptional();        // optional テスト
+
 
 // エントリポイント
 int main(int argc, char* argv[])
 {
     TestOptionStream();
+    TestOptional();
 
     return 0;
+}
+
+// optional テスト
+void TestOptional()
+{
+    using tork::optional;
+    using namespace std;
+
+    cout << "optional test" << endl;
+
+    optional<int> oi = 60;
+    if (oi.valid()) {
+        cout << "valid :" << oi << endl;
+    }
+    else {
+        cout << "invalid." << endl;
+    }
 }
 
 // OptionStream テスト
@@ -19,6 +39,8 @@ void TestOptionStream()
 {
     using namespace tork;
     using namespace std;
+
+    cout << "OptionStream test" << endl;
 
     char* args[] = {
         "prog", "-ABCZ", "-h", "-x", "20",
