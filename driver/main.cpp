@@ -1,16 +1,19 @@
 ﻿#include <iostream>
 #include <tork.h>
+#include <tork/app/OptionStream.h>
 using namespace std;
 
 DebugDetectMemoryLeak(global_memory_leak_detection);
 
 
-int main(int argc, char* argv[])
+void TestOptionStream()
 {
+    using namespace tork;
+
     char* args[] = {
-        "prog", "-A", "-B", "-h", "-x",
+        "prog", "-A", "-B", "-h", "-x", "--name=value",
     };
-    int len = tork::length_of(args);
+    int len = length_of(args);
 
     tork::OptionStream optst(len, args);
     try {
@@ -18,7 +21,7 @@ int main(int argc, char* argv[])
     }
     catch (tork::InvalidOption& e) {
         cerr << e.what() << endl;
-        return 1;
+ //       return;
     }
 
     char ch;
@@ -26,12 +29,24 @@ int main(int argc, char* argv[])
         cout << ch << endl;
     }
 
-    pair<string, tork::OptionHasArg> specs[] = {
-        {"name", tork::OptionHasArg::None},
-        {"value", tork::OptionHasArg::Required},
-        {"id", tork::OptionHasArg::Optional},
+    tork::OptionSpec specs[] = {
+        { "ABCfhZ", tork::OptionType::Char },
+        { "x", tork::OptionType::NeedArg },
+        { "name", tork::OptionType::Normal },
+        { "value", tork::OptionType::MayArg },
+        {"id", tork::OptionType::NeedArg},
     };
-    optst.parse(specs);
+    try {
+        optst.parse(specs);
+    }
+    catch (tork::InvalidOption& e) {
+        cerr << e.what() << endl;
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    TestOptionStream();
 
     return 0;
 }

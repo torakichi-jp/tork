@@ -10,6 +10,9 @@
 #include <vector>
 #include <list>
 #include <stdexcept>
+#include <algorithm>
+#include <regex>
+#include "../debug.h"
 
 namespace tork {
 
@@ -27,9 +30,10 @@ struct CmdOption {
     std::string arg;    // 引数値（なければ空文字）
 };
 
-// オプションに引数があるかどうかの指定用
-//                        無し  必要      どちらでも
-enum class OptionHasArg { None, Required, Optional };
+// オプションタイプ
+enum class OptionType { Normal, NeedArg, MayArg, Char };
+
+using OptionSpec = std::pair<std::string, OptionType>;
 
 // コマンドラインオプションの処理
 class OptionStream {
@@ -58,15 +62,19 @@ public:
     void parse(const std::string& optstr);
 
     // 詳細オプション解析
+    // STLコンテナ版
     template<template<class T, class Allocator = std::allocator<T>> class Container>
-    void parse(const Container<std::pair<std::string, OptionHasArg>>& specs);
+    void parse(const Container<OptionSpec>& specs);
 
+    // 配列版
     template<size_t S>
-    void parse(const std::pair<std::string, OptionHasArg> (&specs)[S]);
+    void parse(const OptionSpec (&specs)[S]);
 
-    bool valid() const { return is_valid_; }
+    // ポインタ＋サイズ版
+    void parse(const OptionSpec* pSpecs, int num);
 
     // ストリームから読み込めるかどうか
+    bool valid() const { return is_valid_; }
     explicit operator bool() const { return valid(); }
 
 
@@ -85,33 +93,120 @@ private:
     static const std::string empty_str_; // 空文字列を返す時に使う
 
 
+    // オプション以外の引数かどうかチェック
+    // i: argv_ のインデックス
+    bool check_first_arg(size_t i);
+
     // 詳細オプション解析
-    template<class T>
-    void parse_(const T& specs, int num);
-    void parse_(const std::pair<std::string, OptionHasArg>& spec);
+    template<class Iter>
+    void parse_details(Iter first, Iter last);
+
+    // name をspecから検索
+    template<class Iter>
+    Iter find_spec(Iter first, Iter last, const std::string& name) const;
+
+    // 1文字オプションをspecから検索
+    template<class Iter>
+    Iter find_char(Iter first, Iter last, const std::string& ch) const;
+
+    // 長いオプション
+    size_t parse_long_option(size_t i, std::string name, std::string value,
+        const OptionSpec& spec);
+
+    // 1文字オプション
+    size_t parse_char_option(size_t i, std::string opt, std::string rest,
+        const OptionSpec& spec);
 
 };  // class OptionStream
 
 
 // 詳細オプション解析
 template<template<class T, class Allocator = std::allocator<T>> class Container>
-inline void OptionStream::parse(const Container<std::pair<std::string, OptionHasArg>>& specs)
+inline void OptionStream::parse(const Container<OptionSpec>& specs)
 {
-    parse_(specs, specs.size());
+    parse_details(specs.begin(), specs.end());
 }
 
 template<size_t S>
-inline void OptionStream::parse(const std::pair<std::string, OptionHasArg> (&specs)[S])
+inline void OptionStream::parse(const OptionSpec (&specs)[S])
 {
-    parse_(specs, S);
+    parse_details(&specs[0], &specs[S]);
 }
 
-template<class T>
-void OptionStream::parse_(const T& specs, int num)
+inline void OptionStream::parse(const OptionSpec* pSpecs, int num)
 {
-    for (auto v : specs) {
-        parse_(v);
+    parse_details(&pSpecs[0], &pSpecs[num]);
+}
+
+// 詳細オプション解析実装
+// specs: [0, num) のコンテナor配列 要素型はOptionSpec
+template<class Iter>
+void OptionStream::parse_details(Iter first, Iter last)
+{
+    for (size_t i = 0; i < argv_.size(); ) {
+        // オプション以外の引数かどうかチェック
+        if (check_first_arg(i)) {
+            break;
+        }
+
+        std::regex re;
+        std::smatch m;
+
+        // 長いオプション
+        re = "--(\\w+)([:=](\\w+))?";
+        if (regex_match(argv_[i], m, re)) {
+            auto& spec = *find_spec(first, last, m[1].str());
+            i = parse_long_option(i, m[1].str(), m[3].str(), spec);
+            continue;
+        }
+        // 1文字オプション
+        re = "-(\\w)(\\w+)?";
+        if (regex_match(argv_[i], m, re)) {
+            try {
+                auto& spec = *find_char(first, last, m[1].str());
+                i = parse_char_option(i, m[1].str(), m[2].str(), spec);
+            }
+            catch (InvalidOption&) {
+                auto& spec = *find_spec(first, last, m[1].str());
+                i = parse_char_option(i, m[1].str(), m[2].str(), spec);
+            }
+            continue;
+        }
+
+        throw InvalidOption(argv_[i]);
     }
+}
+
+template<class Iter>
+Iter OptionStream::find_spec(Iter first, Iter last, const std::string& name) const
+{
+    auto it = std::find_if(
+            first, last,
+            [&name](const OptionSpec& spec) -> bool {
+                return name == spec.first;
+            });
+    if (it == last) {
+        throw InvalidOption(name);
+    }
+    return it;
+}
+
+template<class Iter>
+Iter OptionStream::find_char(Iter first, Iter last, const std::string& ch) const
+{
+    // オプションタイプが1文字オプションのspec を探す
+    auto it = std::find_if(
+            first, last,
+            [](const OptionSpec& spec) -> bool {
+                return OptionType::Char == spec.second;
+            });
+    if (it == last) {
+        throw InvalidOption(ch);
+    }
+    if (it->first.find(ch[0]) == std::string::npos) {
+        throw InvalidOption(ch);
+    }
+    return it;
 }
 
 }   // namespace tork

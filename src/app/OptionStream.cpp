@@ -80,10 +80,41 @@ void OptionStream::parse(const string& optstr)
     is_valid_ = true;
 }
 
-// 詳細オプション解析
-void OptionStream::parse_(const std::pair<std::string, OptionHasArg>& spec)
+// オプションじゃない引数かどうかチェック
+bool OptionStream::check_first_arg(size_t i)
 {
-    cout << spec.first << ',' << int(spec.second) << endl;
+    std::string arg = argv_[i];
+    if (arg[0] != '-') {
+        // 1文字目がハイフンじゃなかったら、
+        // これが最初のオプション以外の引数である
+        first_arg_index_ = i;
+        return true;
+    }
+    else if (arg == "--") {
+        // "--" と一致したら、この次の引数からが
+        // オプション以外の引数である
+        first_arg_index_ = i + 1;
+        return true;
+    }
+    return false;
+}
+
+// 長いオプション
+size_t OptionStream::parse_long_option(size_t i, std::string name, std::string value,
+        const OptionSpec& spec)
+{
+    DebugPrint("spec <%s, %d>\n", spec.first.c_str(), spec.second);
+    DebugPrint("%d name:\"%s\"\tvalue:\"%s\"\n", i, name.c_str(), value.c_str());
+    return ++i;
+}
+
+// 1文字オプション
+size_t OptionStream::parse_char_option(size_t i, std::string opt, std::string rest,
+        const OptionSpec& spec)
+{
+    DebugPrint("spec <%s, %d>\n", spec.first.c_str(), spec.second);
+    DebugPrint("%d char:\"%s\"\trest :\"%s\"\n", i, opt.c_str(), rest.c_str());
+    return ++i;
 }
 
 // ストリーム入力演算子
