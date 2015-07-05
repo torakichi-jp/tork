@@ -1,7 +1,6 @@
 ﻿#include <iostream>
 #include <tork.h>
-#include <tork/app/OptionStream.h>
-using namespace std;
+//using namespace std;
 
 DebugDetectMemoryLeak(global_memory_leak_detection);
 
@@ -19,6 +18,7 @@ int main(int argc, char* argv[])
 void TestOptionStream()
 {
     using namespace tork;
+    using namespace std;
 
     char* args[] = {
         "prog", "-ABCZ", "-h", "-x", "20",
