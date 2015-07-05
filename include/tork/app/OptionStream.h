@@ -24,6 +24,14 @@ public:
     const std::string& name() const { return name_; }
 };
 
+// オプションが引数を持っていない
+class OptionArgRequired : public std::logic_error {
+    std::string name_;
+public:
+    OptionArgRequired(const std::string& op);
+    const std::string& name() const { return name_; }
+};
+
 // オプション構造体
 struct CmdOption {
     std::string name;   // オプション名
@@ -55,6 +63,9 @@ public:
             return empty_str_;
         }
     }
+
+    // ストリームクリア
+    void clear();
 
     // 1文字オプション解析
     // optstr: 1文字オプションの列としての文字列を指定する
@@ -101,6 +112,9 @@ private:
     template<class Iter>
     void parse_details(Iter first, Iter last);
 
+    size_t parse_option(size_t i, std::string name, std::string value,
+        const OptionSpec& spec);
+
     // name をspecから検索
     template<class Iter>
     Iter find_spec(Iter first, Iter last, const std::string& name) const;
@@ -108,14 +122,6 @@ private:
     // 1文字オプションをspecから検索
     template<class Iter>
     Iter find_char(Iter first, Iter last, const std::string& ch) const;
-
-    // 長いオプション
-    size_t parse_long_option(size_t i, std::string name, std::string value,
-        const OptionSpec& spec);
-
-    // 1文字オプション
-    size_t parse_char_option(size_t i, std::string opt, std::string rest,
-        const OptionSpec& spec);
 
 };  // class OptionStream
 
@@ -143,6 +149,8 @@ inline void OptionStream::parse(const OptionSpec* pSpecs, int num)
 template<class Iter>
 void OptionStream::parse_details(Iter first, Iter last)
 {
+    clear();
+
     for (size_t i = 0; i < argv_.size(); ) {
         // オプション以外の引数かどうかチェック
         if (check_first_arg(i)) {
@@ -156,25 +164,27 @@ void OptionStream::parse_details(Iter first, Iter last)
         re = "--(\\w+)([:=](\\w+))?";
         if (regex_match(argv_[i], m, re)) {
             auto& spec = *find_spec(first, last, m[1].str());
-            i = parse_long_option(i, m[1].str(), m[3].str(), spec);
+            i = parse_option(i, m[1].str(), m[3].str(), spec);
             continue;
         }
         // 1文字オプション
         re = "-(\\w)(\\w+)?";
         if (regex_match(argv_[i], m, re)) {
             try {
-                auto& spec = *find_char(first, last, m[1].str());
-                i = parse_char_option(i, m[1].str(), m[2].str(), spec);
+                auto& spec = *find_spec(first, last, m[1].str());
+                i = parse_option(i, m[1].str(), m[2].str(), spec);
             }
             catch (InvalidOption&) {
-                auto& spec = *find_spec(first, last, m[1].str());
-                i = parse_char_option(i, m[1].str(), m[2].str(), spec);
+                auto& spec = *find_char(first, last, m[1].str());
+                i = parse_option(i, m[1].str(), m[2].str(), spec);
             }
             continue;
         }
 
         throw InvalidOption(argv_[i]);
     }
+
+    is_valid_ = true;
 }
 
 template<class Iter>
@@ -186,7 +196,8 @@ Iter OptionStream::find_spec(Iter first, Iter last, const std::string& name) con
                 return name == spec.first;
             });
     if (it == last) {
-        throw InvalidOption(name);
+        const std::string head = name.size() == 1 ? "-" : "--";
+        throw InvalidOption(head + name);
     }
     return it;
 }
@@ -201,10 +212,10 @@ Iter OptionStream::find_char(Iter first, Iter last, const std::string& ch) const
                 return OptionType::Char == spec.second;
             });
     if (it == last) {
-        throw InvalidOption(ch);
+        throw InvalidOption("-" + ch);
     }
     if (it->first.find(ch[0]) == std::string::npos) {
-        throw InvalidOption(ch);
+        throw InvalidOption("-" + ch);
     }
     return it;
 }
