@@ -7,6 +7,7 @@
 
 #include "tork/container.h"
 #include "tork/app.h"
+#include "tork/memory.h"
 
 namespace tork {
 

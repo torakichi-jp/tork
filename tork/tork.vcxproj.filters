@@ -25,6 +25,9 @@
     <Filter Include="ソース ファイル\app">
       <UniqueIdentifier>{8f0bde88-240e-4d23-abf8-731801255266}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\tork\memory">
+      <UniqueIdentifier>{ab92501d-587f-484d-8da4-ec4d001efaed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -56,6 +59,9 @@
     </ClInclude>
     <ClInclude Include="..\include\tork\define.h">
       <Filter>ヘッダー ファイル\tork</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tork\memory\shared_ptr.h">
+      <Filter>ヘッダー ファイル\tork\memory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
