@@ -3,6 +3,9 @@
 
 namespace tork {
 
+// 例外を投げない指定
+#define NO_EXCEPT   throw()
+
     // 配列の長さ
     template<class T, size_t S>
     inline size_t length_of(T (&ary)[S])

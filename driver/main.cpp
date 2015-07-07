@@ -1,24 +1,49 @@
 ﻿#include <iostream>
 #include <tork.h>
+#include <memory>
 //using namespace std;
 
 DebugDetectMemoryLeak(global_memory_leak_detection);
 
-void TestOptionStream();    // OptionStream テスト
-void TestOptional();        // optional テスト
+void Test_OptionStream();    // OptionStream テスト
+void Test_optional();        // optional テスト
+void Test_default_deleter(); // default_deleter テスト
 
 
 // エントリポイント
 int main(int argc, char* argv[])
 {
-    TestOptionStream();
-    TestOptional();
+    Test_OptionStream();
+    Test_optional();
+    Test_default_deleter();
 
     return 0;
 }
 
+// default_deleter テスト
+void Test_default_deleter()
+{
+    struct B {
+        int b = 20;
+        virtual ~B() { }
+    };
+    struct D : public B {
+        int* p = new int(100);
+        ~D() {
+            delete p;
+        }
+    };
+
+    B* p = new D[10];
+    tork::default_deleter<B[]> da;
+    da(p);
+
+    tork::default_deleter<B> db;
+    db(new D);
+}
+
 // optional テスト
-void TestOptional()
+void Test_optional()
 {
     using tork::optional;
     using namespace std;
@@ -35,7 +60,7 @@ void TestOptional()
 }
 
 // OptionStream テスト
-void TestOptionStream()
+void Test_OptionStream()
 {
     using namespace tork;
     using namespace std;

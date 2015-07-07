@@ -63,6 +63,12 @@
     <ClInclude Include="..\include\tork\memory\shared_ptr.h">
       <Filter>ヘッダー ファイル\tork\memory</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\tork\memory\default_deleter.h">
+      <Filter>ヘッダー ファイル\tork\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\tork\memory.h">
+      <Filter>ヘッダー ファイル\tork</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
