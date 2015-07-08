@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <tork.h>
+#include <tork/memory/shared_ptr.h>
 #include <memory>
 //using namespace std;
 
@@ -13,9 +14,26 @@ void Test_default_deleter(); // default_deleter テスト
 // エントリポイント
 int main(int argc, char* argv[])
 {
+    /*
     Test_OptionStream();
     Test_optional();
     Test_default_deleter();
+    */
+
+    struct B {
+        int b = 20;
+        virtual ~B() { }
+    };
+    struct D : public B {
+        int* p = new int(100);
+        ~D() {
+            delete p;
+        }
+    };
+    tork::shared_ptr<void> p(new D);
+    tork::shared_ptr<B> sb(new D);
+    std::cout << sb->b << std::endl;
+    tork::shared_ptr<void> sp(new D[20], tork::default_deleter<D[]>());
 
     return 0;
 }
@@ -40,6 +58,9 @@ void Test_default_deleter()
 
     tork::default_deleter<B> db;
     db(new D);
+
+    tork::default_deleter<D> dd;
+    tork::default_deleter<B> db2 = dd;
 }
 
 // optional テスト
