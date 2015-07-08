@@ -208,6 +208,14 @@ public:
     T*       operator ->() { return get(); }
     const T* operator ->() const { return get(); }
 
+    // 入れ替え
+    void swap(shared_ptr& other)
+    {
+        shared_holder_base* pTmp = this->p_holder_;
+        this->p_holder_ = other.p_holder_;
+        other.p_holder_ = pTmp;
+    }
+
 };  // class shared_ptr
 
 
