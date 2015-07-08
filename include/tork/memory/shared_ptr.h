@@ -66,7 +66,7 @@ private:
         }
     }
 
-};
+};  // class shared_holder_base
 
 //==============================================================================
 // ポインタホルダ
@@ -91,6 +91,10 @@ public:
         Allocator a = alloc;
 
         shared_holder* p = Traits::allocate(a, 1);
+        if (!p) {
+            deleter(ptr);
+            return nullptr;
+        }
         // Traits::construct() では private コンストラクタにアクセスできないので
         // 直接 placement new を呼ぶ
         //Traits::construct(a, p, ptr, deleter, alloc);
@@ -123,7 +127,7 @@ private:
 
     }
 
-};
+};  // class shared_holder
 
 //==============================================================================
 // 参照カウンタ式スマートポインタ
@@ -143,7 +147,7 @@ public:
 
     // ポインタ設定
     template<class U>
-    shared_ptr(U* ptr)
+    explicit shared_ptr(U* ptr)
         :p_holder_(
                 shared_holder<U, default_deleter<U>, std::allocator<void>>::create_holder(
                     ptr, default_deleter<U>(), std::allocator<void>()
@@ -159,7 +163,7 @@ public:
     shared_ptr(U* ptr, Deleter deleter)
         :p_holder_(
                 shared_holder<U, Deleter, std::allocator<void>>::create_holder(
-                    ptr, Deleter(), std::allocator<void>()
+                    ptr, deleter, std::allocator<void>()
                 ))
     {
         if (p_holder_) {
@@ -173,6 +177,35 @@ public:
         :p_holder_(
                 shared_holder<U, Deleter, Alloc>::create_holder(
                     ptr, deleter, alloc
+                ))
+    {
+        if (p_holder_) {
+            p_holder_->add_ref();
+        }
+    }
+
+    // nullptr
+    explicit shared_ptr(nullptr_t) :p_holder_(nullptr) { }
+
+    // nullptrとカスタム削除子
+    template<class Deleter>
+    shared_ptr(nullptr_t, Deleter deleter)
+        :p_holder_(
+                shared_holder<T, Deleter, std::allocator<void>>::create_holder(
+                    nullptr, deleter, std::allocator<void>()
+                ))
+    {
+        if (p_holder_) {
+            p_holder_->add_ref();
+        }
+    }
+
+    // nullptr、カスタム削除子、アロケータ
+    template<class Deleter, class Alloc>
+    shared_ptr(nullptr_t, Deleter deleter, Alloc alloc)
+        :p_holder_(
+                shared_holder<T, Deleter, Alloc>::create_holder(
+                    nullptr, deleter, alloc
                 ))
     {
         if (p_holder_) {
