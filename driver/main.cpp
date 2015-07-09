@@ -39,6 +39,9 @@ int main(int argc, char* argv[])
     tork::shared_ptr<void> sb3(std::move(sb2));
     std::cout << sb3.use_count() << std::endl;
     tork::shared_ptr<int> pi(nullptr);
+    tork::shared_ptr<int> pi2(new int(50));
+    pi = std::move(pi2);
+    DebugBox("%d, %d", *pi, pi2.use_count());
 
     return 0;
 }

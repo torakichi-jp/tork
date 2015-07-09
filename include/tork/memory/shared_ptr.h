@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <type_traits>
+#include <cassert>
 #include "default_deleter.h"
 
 namespace tork {
@@ -19,18 +20,12 @@ namespace tork {
 class shared_holder_base {
     int ref_counter_ = 0;   // 参照カウンタ
     int weak_counter_ = 0;  // ウィークカウンタ
+
 public:
     shared_holder_base() { }
     virtual ~shared_holder_base() { }
 
-    // メンバにアクセスできるのは shared_ptr と weak_ptr だけにする
-    template<class> friend class shared_ptr;
-    template<class> friend class weak_ptr;
-
-private:
     virtual void* get() const = 0;      // ポインタ取得
-    virtual void destroy() = 0;         // リソース削除
-    virtual void destroy_holder() = 0;  // ホルダ自身を削除
 
     // 各カウンタ取得
     int get_ref_counter() const { return ref_counter_; }
@@ -69,6 +64,10 @@ private:
             destroy_holder();
         }
     }
+
+private:
+    virtual void destroy() = 0;         // リソース削除
+    virtual void destroy_holder() = 0;  // ホルダ自身を削除
 
 };  // class shared_holder_base
 
@@ -298,6 +297,38 @@ public:
         if (p_holder_) {
             p_holder_->release();
         }
+    }
+
+    // コピー代入演算子
+    shared_ptr& operator =(const shared_ptr& other)
+    {
+        if (other.p_holder_ == this->p_holder_) return *this;
+        shared_ptr(other).swap(*this);
+        return *this;
+    }
+
+    template<class U>
+    shared_ptr& operator =(const shared_ptr<U>& other)
+    {
+        if (other.p_holder_ == this->p_holder_) return *this;
+        shared_ptr(other).swap(*this);
+        return *this;
+    }
+
+    // ムーヴ代入演算子
+    shared_ptr& operator =(shared_ptr&& other)
+    {
+        assert(other.p_holder_ != this->p_holder_);
+        shared_ptr(std::move(other)).swap(*this);
+        return *this;
+    }
+
+    template<class U>
+    shared_ptr& operator =(shared_ptr<U>&& other)
+    {
+        assert(other.p_holder_ != this->p_holder_);
+        shared_ptr(std::move(other)).swap(*this);
+        return *this;
     }
 
     // ポインタ取得
