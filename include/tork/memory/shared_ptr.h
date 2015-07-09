@@ -32,6 +32,10 @@ private:
     virtual void destroy() = 0;         // リソース削除
     virtual void destroy_holder() = 0;  // ホルダ自身を削除
 
+    // 各カウンタ取得
+    int get_ref_counter() const { return ref_counter_; }
+    int get_weak_counter() const { return weak_counter_; } 
+
     // 参照カウンタ増
     void add_ref()
     {
@@ -92,6 +96,8 @@ public:
 
         shared_holder* p = Traits::allocate(a, 1);
         if (!p) {
+            // ホルダの領域を確保できなかったら、リークを防ぐため
+            // リソースを解放しておく
             deleter(ptr);
             return nullptr;
         }
@@ -115,7 +121,7 @@ public:
         Traits::deallocate(a, this, 1);
     }
 
-    // コピー禁止する
+    // コピー禁止にする
     shared_holder(const shared_holder&) = delete;
     shared_holder& operator =(const shared_holder&) = delete;
 
@@ -136,22 +142,32 @@ template <class T>
 class shared_ptr {
     shared_holder_base* p_holder_ = nullptr;
 
+    template<class U> friend class shared_ptr;
+
 public:
     typedef T element_type; // 要素型
 
     //--------------------------------------------------------------------------
     // コンストラクタ
 
-    // デフォルト
+    // デフォルトコンストラクタ
     shared_ptr(): p_holder_(nullptr) { }
 
     // ポインタ設定
-    template<class U>
+    template<class U,
+        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
     explicit shared_ptr(U* ptr)
         :p_holder_(
-                shared_holder<U, default_deleter<U>, std::allocator<void>>::create_holder(
-                    ptr, default_deleter<U>(), std::allocator<void>()
-                ))
+            shared_holder<
+                U,
+                default_deleter<U>,
+                std::allocator<void>
+            >::create_holder(
+                ptr,
+                default_deleter<U>(),
+                std::allocator<void>()
+            )
+        )
     {
         if (p_holder_) {
             p_holder_->add_ref();
@@ -159,12 +175,20 @@ public:
     }
 
     // ポインタとカスタム削除子設定
-    template<class U, class Deleter>
+    template<class U, class Deleter,
+        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
     shared_ptr(U* ptr, Deleter deleter)
         :p_holder_(
-                shared_holder<U, Deleter, std::allocator<void>>::create_holder(
-                    ptr, deleter, std::allocator<void>()
-                ))
+            shared_holder<
+                U,
+                Deleter,
+                std::allocator<void>
+            >::create_holder(
+                ptr,
+                deleter,
+                std::allocator<void>()
+            )
+        )
     {
         if (p_holder_) {
             p_holder_->add_ref();
@@ -172,12 +196,20 @@ public:
     }
 
     // ポインタ、カスタム削除子、アロケータ設定
-    template<class U, class Deleter, class Alloc>
+    template<class U, class Deleter, class Alloc,
+        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
     shared_ptr(U* ptr, Deleter deleter, Alloc alloc)
         :p_holder_(
-                shared_holder<U, Deleter, Alloc>::create_holder(
-                    ptr, deleter, alloc
-                ))
+            shared_holder<
+                U,
+                Deleter,
+                Alloc
+            >::create_holder(
+                ptr,
+                deleter,
+                alloc
+            )
+        )
     {
         if (p_holder_) {
             p_holder_->add_ref();
@@ -191,9 +223,16 @@ public:
     template<class Deleter>
     shared_ptr(nullptr_t, Deleter deleter)
         :p_holder_(
-                shared_holder<T, Deleter, std::allocator<void>>::create_holder(
-                    nullptr, deleter, std::allocator<void>()
-                ))
+            shared_holder<
+                T,
+                Deleter,
+                std::allocator<void>
+            >::create_holder(
+                nullptr,
+                deleter,
+                std::allocator<void>()
+            )
+        )
     {
         if (p_holder_) {
             p_holder_->add_ref();
@@ -204,13 +243,52 @@ public:
     template<class Deleter, class Alloc>
     shared_ptr(nullptr_t, Deleter deleter, Alloc alloc)
         :p_holder_(
-                shared_holder<T, Deleter, Alloc>::create_holder(
-                    nullptr, deleter, alloc
-                ))
+            shared_holder<
+                T,
+                Deleter,
+                Alloc
+            >::create_holder(
+                nullptr,
+                deleter,
+                alloc
+            )
+        )
     {
         if (p_holder_) {
             p_holder_->add_ref();
         }
+    }
+
+    // コピーコンストラクタ
+    shared_ptr(const shared_ptr& other)
+        :p_holder_(other.p_holder_)
+    {
+        if (p_holder_) {
+            p_holder_->add_ref();
+        }
+    }
+
+    template<class U,
+        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
+    shared_ptr(const shared_ptr<U>& other)
+        :p_holder_(other.p_holder_)
+    {
+        if (p_holder_) {
+            p_holder_->add_ref();
+        }
+    }
+
+    // ムーヴコンストラクタ
+    shared_ptr(shared_ptr&& other)
+    {
+        other.swap(*this);
+    }
+
+    template<class U,
+        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
+    shared_ptr(shared_ptr<U>&& other)
+    {
+        other.swap(*this);
     }
 
 
@@ -248,6 +326,41 @@ public:
         this->p_holder_ = other.p_holder_;
         other.p_holder_ = pTmp;
     }
+
+    // 再設定
+    void reset()
+    {
+        shared_ptr().swap(*this);
+    }
+
+    template<class U>
+    void reset(U* ptr)
+    {
+        shared_ptr(ptr).swap(*this);
+    }
+
+    template<class U, class Deleter>
+    void reset(U* ptr, Deleter deleter)
+    {
+        shared_ptr(ptr, deleter).swap(*this);
+    }
+
+    template<class U, class Deleter, class Alloc>
+    void reset(U* ptr, Deleter deleter, Alloc alloc)
+    {
+        shared_ptr(ptr, deleter, alloc).swap(*this);
+    }
+
+    // 参照カウンタ取得
+    int use_count() const {
+        return p_holder_ ? p_holder_->get_ref_counter() : 0;
+    }
+
+    // 所有権を持っているのが自分だけかどうか
+    bool unique() const { return use_count() == 1; }
+
+    // 有効なポインタかどうか（nullptr でないか）
+    explicit operator bool() const { return get() != nullptr; }
 
 };  // class shared_ptr
 

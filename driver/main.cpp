@@ -34,8 +34,11 @@ int main(int argc, char* argv[])
     tork::shared_ptr<B> sb(new D);
     std::cout << sb->b << std::endl;
     tork::shared_ptr<void> sp(new D[20], tork::default_deleter<D[]>());
-
-    tork::shared_ptr<int> pi(0);
+    sp.reset();
+    tork::shared_ptr<void> sb2 = sb;
+    tork::shared_ptr<void> sb3(std::move(sb2));
+    std::cout << sb3.use_count() << std::endl;
+    tork::shared_ptr<int> pi(nullptr);
 
     return 0;
 }
