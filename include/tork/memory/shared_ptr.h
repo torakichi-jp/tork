@@ -14,6 +14,12 @@
 
 namespace tork {
 
+// 前方宣言
+template<class T>
+    class shared_ptr;
+template<class T>
+    class weak_ptr;
+
 //==============================================================================
 // ポインタホルダ基底クラス
 //==============================================================================
@@ -141,7 +147,9 @@ template <class T>
 class shared_ptr {
     shared_holder_base* p_holder_ = nullptr;
 
+    // T じゃない型のにアクセスできるように friend 宣言
     template<class U> friend class shared_ptr;
+    template<class U> friend class weak_ptr;
 
 public:
     typedef T element_type; // 要素型
@@ -150,24 +158,18 @@ public:
     // コンストラクタ
 
     // デフォルトコンストラクタ
-    shared_ptr(): p_holder_(nullptr) { }
+    shared_ptr() :p_holder_(nullptr) { }
 
     // ポインタ設定
     template<class U,
         class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
     explicit shared_ptr(U* ptr)
-        :p_holder_(
-            shared_holder<
-                U,
-                default_deleter<U>,
-                std::allocator<void>
-            >::create_holder(
-                ptr,
-                default_deleter<U>(),
-                std::allocator<void>()
-            )
-        )
+        :p_holder_(nullptr)
     {
+        using Holder = shared_holder<U, default_deleter<U>, std::allocator<void>>;
+
+        p_holder_ = Holder::create_holder(
+                ptr, default_deleter<U>(), std::allocator<void>());
         if (p_holder_) {
             p_holder_->add_ref();
         }
@@ -177,18 +179,12 @@ public:
     template<class U, class Deleter,
         class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
     shared_ptr(U* ptr, Deleter deleter)
-        :p_holder_(
-            shared_holder<
-                U,
-                Deleter,
-                std::allocator<void>
-            >::create_holder(
-                ptr,
-                deleter,
-                std::allocator<void>()
-            )
-        )
+        :p_holder_(nullptr)
     {
+        using Holder = shared_holder<U, Deleter, std::allocator<void>>;
+
+        p_holder_ = Holder::create_holder(
+                ptr, deleter, std::allocator<void>());
         if (p_holder_) {
             p_holder_->add_ref();
         }
@@ -198,18 +194,11 @@ public:
     template<class U, class Deleter, class Alloc,
         class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
     shared_ptr(U* ptr, Deleter deleter, Alloc alloc)
-        :p_holder_(
-            shared_holder<
-                U,
-                Deleter,
-                Alloc
-            >::create_holder(
-                ptr,
-                deleter,
-                alloc
-            )
-        )
+        :p_holder_(nullptr)
     {
+        using Holder = shared_holder<U, Deleter, Alloc>;
+
+        p_holder_ = Holder::create_holder(ptr, deleter, alloc);
         if (p_holder_) {
             p_holder_->add_ref();
         }
@@ -221,18 +210,12 @@ public:
     // nullptrとカスタム削除子
     template<class Deleter>
     shared_ptr(nullptr_t, Deleter deleter)
-        :p_holder_(
-            shared_holder<
-                T,
-                Deleter,
-                std::allocator<void>
-            >::create_holder(
-                nullptr,
-                deleter,
-                std::allocator<void>()
-            )
-        )
+        :p_holder_(nullptr)
     {
+        using Holder = shared_holder<T, Deleter, std::allocator<void>>;
+
+        p_holder_ = Holder::create_holder(
+                nullptr, deleter, std::allocator<void>());
         if (p_holder_) {
             p_holder_->add_ref();
         }
@@ -241,18 +224,11 @@ public:
     // nullptr、カスタム削除子、アロケータ
     template<class Deleter, class Alloc>
     shared_ptr(nullptr_t, Deleter deleter, Alloc alloc)
-        :p_holder_(
-            shared_holder<
-                T,
-                Deleter,
-                Alloc
-            >::create_holder(
-                nullptr,
-                deleter,
-                alloc
-            )
-        )
+        :p_holder_(nullptr)
     {
+        using Holder = shared_holder<T, Deleter, Alloc>;
+
+        p_holder_ = Holder::create_holder(nullptr, deleter, alloc);
         if (p_holder_) {
             p_holder_->add_ref();
         }
@@ -279,6 +255,7 @@ public:
 
     // ムーヴコンストラクタ
     shared_ptr(shared_ptr&& other)
+        :p_holder_(nullptr)
     {
         other.swap(*this);
     }
@@ -286,8 +263,20 @@ public:
     template<class U,
         class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
     shared_ptr(shared_ptr<U>&& other)
+        :p_holder_(nullptr)
     {
         other.swap(*this);
+    }
+
+    // weak_ptr から取得
+    template<class U,
+        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
+    shared_ptr(const weak_ptr<U>& other)
+        :p_holder_(other.p_holder_)
+    {
+        if (p_holder_) {
+            p_holder_->add_ref();
+        }
     }
 
 
