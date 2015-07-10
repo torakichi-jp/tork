@@ -100,7 +100,7 @@ public:
         Allocator a = alloc;
 
         shared_holder* p = Traits::allocate(a, 1);
-        if (!p) {
+        if (p == nullptr) {
             // ホルダの領域を確保できなかったら、リークを防ぐため
             // リソースを解放しておく
             deleter(ptr);
@@ -255,20 +255,20 @@ public:
 
     // ムーヴコンストラクタ
     shared_ptr(shared_ptr&& other)
-        :p_holder_(nullptr)
+        :p_holder_(other.p_holder_)
     {
-        other.swap(*this);
+        other.p_holder_ = nullptr;
     }
 
     template<class U,
         class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
     shared_ptr(shared_ptr<U>&& other)
-        :p_holder_(nullptr)
+        :p_holder_(other.p_holder_)
     {
-        other.swap(*this);
+        other.p_holder_ = nullptr;
     }
 
-    // weak_ptr から取得
+    // weak_ptr から生成
     template<class U,
         class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
     shared_ptr(const weak_ptr<U>& other)
@@ -382,7 +382,64 @@ public:
     // 有効なポインタかどうか（nullptr でないか）
     explicit operator bool() const { return get() != nullptr; }
 
+
+    template<class T1, class T2>
+    friend shared_ptr<T1> static_pointer_cast(const shared_ptr<T2>& r);
+
+    template<class T1, class T2>
+    friend shared_ptr<T1> const_pointer_cast(const shared_ptr<T2>& r);
+
+    template<class T1, class T2>
+    friend shared_ptr<T1> dynamic_pointer_cast(const shared_ptr<T2>& r);
+
 };  // class shared_ptr
+
+
+// スタティックキャスト
+template<class T, class U>
+shared_ptr<T> static_pointer_cast(const shared_ptr<U>& r)
+{
+    if (r.p_holder_ == nullptr) {
+        return shared_ptr<T>();
+    }
+    static_cast<T*>(r.get());
+    shared_ptr<T> sptr;
+    sptr.p_holder_ = r.p_holder_;
+    r.p_holder_->add_ref();
+    return sptr;
+}
+
+// const キャスト
+template<class T, class U>
+shared_ptr<T> const_pointer_cast(const shared_ptr<U>& r)
+{
+    if (r.p_holder_ == nullptr) {
+        return shared_ptr<T>();
+    }
+    const_cast<T*>(r.get());
+    shared_ptr<T> sptr;
+    sptr.p_holder_ = r.p_holder_;
+    r.p_holder_->add_ref();
+    return sptr;
+}
+
+// ダイナミックキャスト
+template<class T, class U>
+shared_ptr<T> dynamic_pointer_cast(const shared_ptr<U>& r)
+{
+    if (r.p_holder_ == nullptr) {
+        return shared_ptr<T>();
+    }
+    if (dynamic_cast<T*>(r.get())) {
+        shared_ptr<T> sptr;
+        sptr.p_holder_ = r.p_holder_;
+        r.p_holder_->add_ref();
+        return sptr;
+    }
+    else {
+        return shared_ptr<T>();
+    }
+}
 
 
 }   // namespace tork

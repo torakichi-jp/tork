@@ -2,34 +2,41 @@
 #include <tork.h>
 #include <tork/memory/shared_ptr.h>
 #include <memory>
-//using namespace std;
 
 DebugDetectMemoryLeak(global_memory_leak_detection);
 
 void Test_OptionStream();    // OptionStream テスト
 void Test_optional();        // optional テスト
 void Test_default_deleter(); // default_deleter テスト
+void Test_shared_ptr();      // shared_ptr テスト
 
+struct B {
+    int b = 20;
+    virtual ~B() { }
+};
+struct D : public B {
+    int* p;
+    D(int n = 100) :p(T_NEW int(n)) { }
+    ~D() {
+        delete p;
+    }
+};
 
 // エントリポイント
-int main(int argc, char* argv[])
+int main()
 {
     /*
     Test_OptionStream();
     Test_optional();
     Test_default_deleter();
     */
+    Test_shared_ptr();
 
-    struct B {
-        int b = 20;
-        virtual ~B() { }
-    };
-    struct D : public B {
-        int* p = new int(100);
-        ~D() {
-            delete p;
-        }
-    };
+    return 0;
+}
+
+void Test_shared_ptr()
+{
     tork::shared_ptr<void> p(new D);
     tork::shared_ptr<B> sb(new D);
     std::cout << sb->b << std::endl;
@@ -38,28 +45,23 @@ int main(int argc, char* argv[])
     tork::shared_ptr<void> sb2 = sb;
     tork::shared_ptr<void> sb3(std::move(sb2));
     std::cout << sb3.use_count() << std::endl;
+
     tork::shared_ptr<int> pi(nullptr);
     tork::shared_ptr<int> pi2(new int(50));
     pi = std::move(pi2);
-    DebugBox("%d, %d", *pi, pi2.use_count());
+    DebugPrint("%d, %d\n", *pi, pi2.use_count());
 
-    return 0;
+    tork::shared_ptr<const D> sc(new D);
+    tork::shared_ptr<B> sd = tork::const_pointer_cast<D>(sc);
+    DebugPrint("%d, %d\n", sd.use_count(), sd->b);
+
+    tork::shared_ptr<B> sbp(T_NEW B);
+    DebugPrint("%p\n", tork::dynamic_pointer_cast<D>(sbp).get());
 }
 
 // default_deleter テスト
 void Test_default_deleter()
 {
-    struct B {
-        int b = 20;
-        virtual ~B() { }
-    };
-    struct D : public B {
-        int* p = new int(100);
-        ~D() {
-            delete p;
-        }
-    };
-
     B* p = new D[10];
     tork::default_deleter<B[]> da;
     da(p);
