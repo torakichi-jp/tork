@@ -93,6 +93,11 @@ public:
     // ホルダ作成
     static shared_holder* create_holder(T* ptr, Deleter deleter, Alloc alloc)
     {
+        // リソースがなければホルダも作らない
+        if (ptr == nullptr) {
+            return nullptr;
+        }
+
         // アロケータの再束縛
         using Holder = shared_holder<T, Deleter, Alloc>;
         using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
