@@ -393,27 +393,24 @@ public:
     shared_ptr() :p_holder_(nullptr) { }
 
     // ポインタ設定
-    template<class U,
-        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-    explicit shared_ptr(U* ptr)
+    explicit shared_ptr(T* ptr)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<U, default_deleter<U[]>, std::allocator<void>>;
+        using Holder = shared_holder<T, default_deleter<T[]>, std::allocator<void>>;
 
         p_holder_ = Holder::create_holder(
-                ptr, default_deleter<U>(), std::allocator<void>());
+                ptr, default_deleter<T[]>(), std::allocator<void>());
         if (p_holder_) {
             p_holder_->add_ref();
         }
     }
 
     // ポインタとカスタム削除子設定
-    template<class U, class Deleter,
-        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-    shared_ptr(U* ptr, Deleter deleter)
+    template<class Deleter>
+    shared_ptr(T* ptr, Deleter deleter)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<U, Deleter, std::allocator<void>>;
+        using Holder = shared_holder<T, Deleter, std::allocator<void>>;
 
         p_holder_ = Holder::create_holder(
                 ptr, deleter, std::allocator<void>());
@@ -423,12 +420,11 @@ public:
     }
 
     // ポインタ、カスタム削除子、アロケータ設定
-    template<class U, class Deleter, class Alloc,
-        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-    shared_ptr(U* ptr, Deleter deleter, Alloc alloc)
+    template<class Deleter, class Alloc>
+    shared_ptr(T* ptr, Deleter deleter, Alloc alloc)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<U, Deleter, Alloc>;
+        using Holder = shared_holder<T, Deleter, Alloc>;
 
         p_holder_ = Holder::create_holder(ptr, deleter, alloc);
         if (p_holder_) {
@@ -448,16 +444,6 @@ public:
         }
     }
 
-    template<class U,
-        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-    shared_ptr(const shared_ptr<U>& other)
-        :p_holder_(other.p_holder_)
-    {
-        if (p_holder_) {
-            p_holder_->add_ref();
-        }
-    }
-
     // ムーブコンストラクタ
     shared_ptr(shared_ptr&& other)
         :p_holder_(other.p_holder_)
@@ -465,18 +451,8 @@ public:
         other.p_holder_ = nullptr;
     }
 
-    template<class U,
-        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-    shared_ptr(shared_ptr<U>&& other)
-        :p_holder_(other.p_holder_)
-    {
-        other.p_holder_ = nullptr;
-    }
-
     // weak_ptr から生成
-    template<class U,
-        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-    shared_ptr(const weak_ptr<U>& other)
+    shared_ptr(const weak_ptr<T[]>& other)
         :p_holder_(other.p_holder_)
     {
         if (p_holder_) {
@@ -501,24 +477,8 @@ public:
         return *this;
     }
 
-    template<class U>
-    shared_ptr& operator =(const shared_ptr<U>& other)
-    {
-        if (other.p_holder_ == this->p_holder_) return *this;
-        shared_ptr(other).swap(*this);
-        return *this;
-    }
-
     // ムーブ代入演算子
     shared_ptr& operator =(shared_ptr&& other)
-    {
-        assert(other.p_holder_ != this->p_holder_);
-        shared_ptr(std::move(other)).swap(*this);
-        return *this;
-    }
-
-    template<class U>
-    shared_ptr& operator =(shared_ptr<U>&& other)
     {
         assert(other.p_holder_ != this->p_holder_);
         shared_ptr(std::move(other)).swap(*this);
@@ -554,20 +514,19 @@ public:
         shared_ptr().swap(*this);
     }
 
-    template<class U>
-    void reset(U* ptr)
+    void reset(T* ptr)
     {
         shared_ptr(ptr).swap(*this);
     }
 
-    template<class U, class Deleter>
-    void reset(U* ptr, Deleter deleter)
+    template<class Deleter>
+    void reset(T* ptr, Deleter deleter)
     {
         shared_ptr(ptr, deleter).swap(*this);
     }
 
-    template<class U, class Deleter, class Alloc>
-    void reset(U* ptr, Deleter deleter, Alloc alloc)
+    template<class Deleter, class Alloc>
+    void reset(T* ptr, Deleter deleter, Alloc alloc)
     {
         shared_ptr(ptr, deleter, alloc).swap(*this);
     }
@@ -583,18 +542,7 @@ public:
     // 有効なポインタかどうか（nullptr でないか）
     explicit operator bool() const { return get() != nullptr; }
 
-
-    template<class T1, class T2>
-    friend shared_ptr<T1> static_pointer_cast(const shared_ptr<T2>& r);
-
-    template<class T1, class T2>
-    friend shared_ptr<T1> const_pointer_cast(const shared_ptr<T2>& r);
-
-    template<class T1, class T2>
-    friend shared_ptr<T1> dynamic_pointer_cast(const shared_ptr<T2>& r);
-
 };  // class shared_ptr
-
 
 
 // スタティックキャスト

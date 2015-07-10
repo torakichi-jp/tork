@@ -57,6 +57,10 @@ void Test_shared_ptr()
 
     tork::shared_ptr<B> sbp(T_NEW B);
     DebugPrint("%p\n", tork::dynamic_pointer_cast<D>(sbp).get());
+
+    tork::shared_ptr<int[]> ai(new int[20]);
+    ai[5] = 400;
+    DebugBox("%d\n", ai[5]);
 }
 
 // default_deleter テスト
