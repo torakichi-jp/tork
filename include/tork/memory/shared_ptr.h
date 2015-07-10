@@ -207,33 +207,6 @@ public:
     // nullptr
     explicit shared_ptr(nullptr_t) :p_holder_(nullptr) { }
 
-    // nullptrとカスタム削除子
-    template<class Deleter>
-    shared_ptr(nullptr_t, Deleter deleter)
-        :p_holder_(nullptr)
-    {
-        using Holder = shared_holder<T, Deleter, std::allocator<void>>;
-
-        p_holder_ = Holder::create_holder(
-                nullptr, deleter, std::allocator<void>());
-        if (p_holder_) {
-            p_holder_->add_ref();
-        }
-    }
-
-    // nullptr、カスタム削除子、アロケータ
-    template<class Deleter, class Alloc>
-    shared_ptr(nullptr_t, Deleter deleter, Alloc alloc)
-        :p_holder_(nullptr)
-    {
-        using Holder = shared_holder<T, Deleter, Alloc>;
-
-        p_holder_ = Holder::create_holder(nullptr, deleter, alloc);
-        if (p_holder_) {
-            p_holder_->add_ref();
-        }
-    }
-
     // コピーコンストラクタ
     shared_ptr(const shared_ptr& other)
         :p_holder_(other.p_holder_)
