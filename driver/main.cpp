@@ -60,7 +60,9 @@ void Test_shared_ptr()
 
     tork::shared_ptr<int[]> ai(new int[20]);
     ai[5] = 400;
-    DebugBox("%d\n", ai[5]);
+    DebugPrint("%d\n", ai[5]);
+    sb3 = ai;
+    DebugPrint("%d\n", tork::static_pointer_cast<int[]>(sb3)[5]);
 }
 
 // default_deleter テスト

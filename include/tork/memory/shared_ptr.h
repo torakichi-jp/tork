@@ -379,9 +379,8 @@ template <class T>
 class shared_ptr<T[]> {
     shared_holder_base* p_holder_ = nullptr;
 
-    // T じゃない型のにアクセスできるように friend 宣言
-    template<class U> friend class shared_ptr;
-    template<class U> friend class weak_ptr;
+    template<class> friend class shared_ptr;
+    template<class> friend class weak_ptr;
 
 public:
     typedef T element_type; // 要素型
@@ -541,6 +540,16 @@ public:
 
     // 有効なポインタかどうか（nullptr でないか）
     explicit operator bool() const { return get() != nullptr; }
+
+
+    template<class T1, class T2>
+    friend shared_ptr<T1> static_pointer_cast(const shared_ptr<T2>& r);
+
+    template<class T1, class T2>
+    friend shared_ptr<T1> const_pointer_cast(const shared_ptr<T2>& r);
+
+    template<class T1, class T2>
+    friend shared_ptr<T1> dynamic_pointer_cast(const shared_ptr<T2>& r);
 
 };  // class shared_ptr
 
