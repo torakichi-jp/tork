@@ -65,6 +65,14 @@ void Test_shared_ptr()
     DebugPrint("%d\n", ai[5]);
     sb3 = ai;
     DebugPrint("%d\n", tork::static_pointer_cast<int[]>(sb3)[5]);
+
+    shared_ptr<B> b;
+    shared_ptr<D> d(new D);
+    std::cout << std::boolalpha;
+    std::cout << (b == b) << ' ' << (b == nullptr) << std::endl;
+    std::cout << (b != d) << ' ' << (d != nullptr) << std::endl;
+    std::cout << (b < d) << ' ' << (b > d) << std::endl;
+    std::cout << (b <= d) << ' ' << (b >= d) << std::endl;
 }
 
 // default_deleter テスト
