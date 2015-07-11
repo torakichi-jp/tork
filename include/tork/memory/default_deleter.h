@@ -17,11 +17,11 @@ struct default_deleter {
     default_deleter() NO_EXCEPT { }
     ~default_deleter() { }
 
-    template<class U>
+    template<class U,
+        class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
     default_deleter(const default_deleter<U>&) NO_EXCEPT
     {
-        static_assert(std::is_convertible<U*, T*>::value,
-                "specified an inconvertible type");
+
     }
 
     void operator ()(T* ptr) const

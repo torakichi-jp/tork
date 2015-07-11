@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <tork.h>
 #include <tork/memory/shared_ptr.h>
+#include <tork/memory/allocator.h>
 #include <memory>
 
 DebugDetectMemoryLeak(global_memory_leak_detection);
@@ -31,6 +32,12 @@ int main()
     Test_default_deleter();
     */
     Test_shared_ptr();
+
+    tork::allocator<int> a;
+    int* p = a.allocate(10);
+    p[5] = 100;
+    std::cout << p[5] << std::endl;
+    a.deallocate(p, 10);
 
     return 0;
 }
@@ -95,6 +102,7 @@ void Test_default_deleter()
 
     tork::default_deleter<D> dd;
     tork::default_deleter<B> db2 = dd;
+    //tork::default_deleter<int> di = dd;
 }
 
 // optional テスト

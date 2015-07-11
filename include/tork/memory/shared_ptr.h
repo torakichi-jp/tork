@@ -12,6 +12,7 @@
 #include <cassert>
 #include <ostream>
 #include "default_deleter.h"
+#include "allocator.h"
 
 namespace tork {
 
@@ -178,10 +179,10 @@ public:
     explicit shared_ptr(U* ptr)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<U, default_deleter<U>, std::allocator<void>>;
+        using Holder = shared_holder<U, default_deleter<U>, tork::allocator<void>>;
 
         p_holder_ = Holder::create_holder(
-                ptr, default_deleter<U>(), std::allocator<void>());
+                ptr, default_deleter<U>(), tork::allocator<void>());
         if (p_holder_) {
             p_holder_->add_ref();
         }
@@ -193,10 +194,10 @@ public:
     shared_ptr(U* ptr, Deleter deleter)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<U, Deleter, std::allocator<void>>;
+        using Holder = shared_holder<U, Deleter, tork::allocator<void>>;
 
         p_holder_ = Holder::create_holder(
-                ptr, deleter, std::allocator<void>());
+                ptr, deleter, tork::allocator<void>());
         if (p_holder_) {
             p_holder_->add_ref();
         }
@@ -402,10 +403,10 @@ public:
     explicit shared_ptr(T* ptr)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<T, default_deleter<T[]>, std::allocator<void>>;
+        using Holder = shared_holder<T, default_deleter<T[]>, tork::allocator<void>>;
 
         p_holder_ = Holder::create_holder(
-                ptr, default_deleter<T[]>(), std::allocator<void>());
+                ptr, default_deleter<T[]>(), tork::allocator<void>());
         if (p_holder_) {
             p_holder_->add_ref();
         }
@@ -416,10 +417,10 @@ public:
     shared_ptr(T* ptr, Deleter deleter)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<T, Deleter, std::allocator<void>>;
+        using Holder = shared_holder<T, Deleter, tork::allocator<void>>;
 
         p_holder_ = Holder::create_holder(
-                ptr, deleter, std::allocator<void>());
+                ptr, deleter, tork::allocator<void>());
         if (p_holder_) {
             p_holder_->add_ref();
         }
