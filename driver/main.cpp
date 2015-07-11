@@ -79,6 +79,8 @@ void Test_shared_ptr()
     shared_ptr<int> m(new int(20));
     std::swap(n, m);
     DebugPrint("%d, %d\n", *n, *m);
+
+    std::cout << n << '\n' << m << std::endl;
 }
 
 // default_deleter テスト

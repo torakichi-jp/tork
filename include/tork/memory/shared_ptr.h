@@ -10,6 +10,7 @@
 #include <memory>
 #include <type_traits>
 #include <cassert>
+#include <ostream>
 #include "default_deleter.h"
 
 namespace tork {
@@ -701,6 +702,15 @@ template<class T>
 bool operator >=(nullptr_t, const shared_ptr<T>& rhs)
 {
     return !(nullptr < rhs);
+}
+
+// ストリーム出力
+template<class charT, class Traits, class T>
+std::basic_ostream<charT, Traits>& operator <<(
+        std::basic_ostream<charT, Traits>& os, const shared_ptr<T>& p)
+{
+    os << p.get();
+    return os;
 }
 
 // swap()
