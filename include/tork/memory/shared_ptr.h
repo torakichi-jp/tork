@@ -601,6 +601,109 @@ shared_ptr<T> dynamic_pointer_cast(const shared_ptr<U>& r)
 }
 
 
+// operator ==
+template<class T, class U>
+bool operator ==(const shared_ptr<T>& lhs, const shared_ptr<U>& rhs)
+{
+    return lhs.get() == rhs.get();
+}
+template<class T>
+bool operator ==(const shared_ptr<T>& lhs, nullptr_t)
+{
+    return lhs.get() == nullptr;
+}
+template<class T>
+bool operator ==(nullptr_t, const shared_ptr<T>& rhs)
+{
+    return nullptr == rhs.get();
+}
+
+// operator !=
+template<class T, class U>
+bool operator !=(const shared_ptr<T>& lhs, const shared_ptr<U>& rhs)
+{
+    return lhs.get() != rhs.get();
+}
+template<class T>
+bool operator !=(const shared_ptr<T>& lhs, nullptr_t)
+{
+    return lhs.get() != nullptr;
+}
+template<class T>
+bool operator !=(nullptr_t, const shared_ptr<T>& rhs)
+{
+    return nullptr != rhs.get();
+}
+
+// operator <
+template<class T, class U>
+bool operator <(const shared_ptr<T>& lhs, const shared_ptr<U>& rhs)
+{
+    return lhs.get() < rhs.get();
+}
+template<class T>
+bool operator <(const shared_ptr<T>& lhs, nullptr_t)
+{
+    return lhs.get() < nullptr;
+}
+template<class T>
+bool operator <(nullptr_t, const shared_ptr<T>& rhs)
+{
+    return nullptr < rhs.get();
+}
+
+// operator <=
+template<class T, class U>
+bool operator <=(const shared_ptr<T>& lhs, const shared_ptr<U>& rhs)
+{
+    return !(rhs < lhs);
+}
+template<class T>
+bool operator <=(const shared_ptr<T>& lhs, nullptr_t)
+{
+    return !(nullptr < lhs);
+}
+template<class T>
+bool operator <=(nullptr_t, const shared_ptr<T>& rhs)
+{
+    return !(rhs < nullptr);
+}
+
+// operator >
+template<class T, class U>
+bool operator >(const shared_ptr<T>& lhs, const shared_ptr<U>& rhs)
+{
+    return rhs < lhs;
+}
+template<class T>
+bool operator >(const shared_ptr<T>& lhs, nullptr_t)
+{
+    return nullptr < lhs;
+}
+template<class T>
+bool operator >(nullptr_t, const shared_ptr<T>& rhs)
+{
+    return rhs < nullptr;
+}
+
+// operator >=
+template<class T, class U>
+bool operator >=(const shared_ptr<T>& lhs, const shared_ptr<U>& rhs)
+{
+    return !(lhs < rhs);
+}
+template<class T>
+bool operator >=(const shared_ptr<T>& lhs, nullptr_t)
+{
+    return !(lhs < nullptr);
+}
+template<class T>
+bool operator >=(nullptr_t, const shared_ptr<T>& rhs)
+{
+    return !(nullptr < rhs);
+}
+
+
 }   // namespace tork
 
 #endif  // TORK_MEMORY_SHARED_PTR_H_INCLUDED

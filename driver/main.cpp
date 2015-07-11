@@ -37,7 +37,9 @@ int main()
 
 void Test_shared_ptr()
 {
-    tork::shared_ptr<void> p(new D);
+    using tork::shared_ptr;
+
+    shared_ptr<void> p(new D);
     tork::shared_ptr<B> sb(new D);
     std::cout << sb->b << std::endl;
     tork::shared_ptr<void> sp(new D[20], tork::default_deleter<D[]>());
