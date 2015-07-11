@@ -63,8 +63,9 @@ void Test_shared_ptr()
     tork::shared_ptr<int[]> ai(new int[20]);
     ai[5] = 400;
     DebugPrint("%d\n", ai[5]);
-    sb3 = ai;
-    DebugPrint("%d\n", tork::static_pointer_cast<int[]>(sb3)[5]);
+    shared_ptr<void> sv;
+    sv = ai;
+    DebugPrint("%d\n", tork::static_pointer_cast<int[]>(sv)[5]);
 
     shared_ptr<B> b;
     shared_ptr<D> d(new D);
@@ -73,6 +74,11 @@ void Test_shared_ptr()
     std::cout << (b != d) << ' ' << (d != nullptr) << std::endl;
     std::cout << (b < d) << ' ' << (b > d) << std::endl;
     std::cout << (b <= d) << ' ' << (b >= d) << std::endl;
+
+    shared_ptr<int> n(new int(10));
+    shared_ptr<int> m(new int(20));
+    std::swap(n, m);
+    DebugPrint("%d, %d\n", *n, *m);
 }
 
 // default_deleter テスト
