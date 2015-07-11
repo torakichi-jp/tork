@@ -99,23 +99,29 @@ public:
             return nullptr;
         }
 
+        // 継承を利用して Alloc::construct() が shared_holder の
+        // private コンストラクタにアクセスできるようにするためのクラス
+        struct holder_impl : shared_holder<T, Deleter, Alloc> {
+            holder_impl(T* p, Deleter d, Alloc a)
+                : shared_holder(p, d, a) { }
+        };
+
         // アロケータの再束縛
-        using Holder = shared_holder<T, Deleter, Alloc>;
+        using Holder = holder_impl;
+        //using Holder = shared_holder<T, Deleter, Alloc>;
         using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
         using Traits = std::allocator_traits<Allocator>;
         Allocator a = alloc;
 
-        shared_holder* p = Traits::allocate(a, 1);
+        holder_impl* p = Traits::allocate(a, 1);
         if (p == nullptr) {
             // ホルダの領域を確保できなかったら、リークを防ぐため
             // リソースを解放しておく
             deleter(ptr);
             return nullptr;
         }
-        // Traits::construct() では private コンストラクタにアクセスできないので
-        // 直接 placement new を呼ぶ
-        //Traits::construct(a, p, ptr, deleter, alloc);
-        p = ::new(p) shared_holder(ptr, deleter, alloc);
+
+        Traits::construct(a, p, ptr, deleter, alloc);
         return p;
     }
 
