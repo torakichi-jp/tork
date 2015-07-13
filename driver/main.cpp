@@ -30,6 +30,20 @@ struct D : public B {
         delete p;
     }
     D(const D&) = delete;
+    D& operator =(const D&) = delete;
+
+    D(D&& other)
+        :B(other)
+    {
+        p = other.p;
+        other.p = nullptr;
+    }
+    D& operator =(D&& other)
+    {
+        b = other.b;
+        p = other.p;
+        other.p = nullptr;
+    }
 };
 
 // エントリポイント
@@ -42,6 +56,7 @@ int main()
     */
     Test_shared_ptr();
 
+    stopper();
     return 0;
 }
 
