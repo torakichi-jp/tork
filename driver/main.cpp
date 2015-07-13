@@ -7,6 +7,13 @@
 // メモリリーク検出
 DebugDetectMemoryLeak(global_memory_leak_detection);
 
+void stopper()
+{
+    std::cout << "enter to continue." << std::endl;
+    std::cin.clear();
+    std::cin.get();
+}
+
 void Test_OptionStream();    // OptionStream テスト
 void Test_optional();        // optional テスト
 void Test_default_deleter(); // default_deleter テスト
