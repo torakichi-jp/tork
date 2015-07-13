@@ -63,7 +63,8 @@ namespace impl {
         void release()
         {
             --ref_counter_;
-            if (ref_counter_ <= 0) {
+            assert(ref_counter_ >= 0);
+            if (ref_counter_ == 0) {
                 destroy();
             }
             release_weak_ref();
@@ -80,7 +81,8 @@ namespace impl {
         void release_weak_ref()
         {
             --weak_counter_;
-            if (weak_counter_ <= 0) {
+            assert(weak_counter_ >= 0);
+            if (weak_counter_ == 0) {
                 destroy_holder();
             }
         }

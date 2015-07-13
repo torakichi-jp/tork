@@ -9,7 +9,7 @@ DebugDetectMemoryLeak(global_memory_leak_detection);
 
 void stopper()
 {
-    std::cout << "enter to continue." << std::endl;
+    std::cout << "enter to continue." << std::flush;
     std::cin.clear();
     std::cin.get();
 }
@@ -19,13 +19,15 @@ void Test_optional();        // optional テスト
 void Test_default_deleter(); // default_deleter テスト
 void Test_shared_ptr();      // shared_ptr テスト
 
+// テスト用の基底クラス
 struct B {
     int b = 20;
     virtual ~B() { }
 };
+// テスト用の派生クラス
 struct D : public B {
     int* p;
-    explicit D(int n = 100) :p(T_NEW int(n)) { }
+    explicit D(int n = 100) :p(T_NEW int(n)) { b = n; }
     ~D() {
         delete p;
     }
@@ -60,6 +62,7 @@ int main()
     return 0;
 }
 
+// shared_ptr テスト
 void Test_shared_ptr()
 {
     using tork::shared_ptr;
@@ -85,7 +88,7 @@ void Test_shared_ptr()
     DebugPrint("%d, %d\n", sd.use_count(), sd->b);
 
     tork::shared_ptr<B> sbp(T_NEW B);
-    DebugPrint("%p\n", tork::dynamic_pointer_cast<D>(sbp).get());
+    DebugPrint("dynamic_pointer_cast : %p\n", tork::dynamic_pointer_cast<D>(sbp).get());
 
     tork::shared_ptr<int[]> ai(new int[20]);
     ai[5] = 400;
@@ -109,7 +112,7 @@ void Test_shared_ptr()
     std::swap(n, m);
     DebugPrint("%d, %d\n", *n, *m);
 
-    std::cout << n << '\n' << m << std::endl;
+    std::cout << n << ' ' << m << std::endl;
 
     auto mp = shared_ptr<D>::make(987);
     shared_ptr<B> mpb;
@@ -121,7 +124,7 @@ void Test_shared_ptr()
 
     std::hash<shared_ptr<int>> h;
     auto hp = shared_ptr<int>(T_NEW int(150));
-    std::cout << h(hp) << std::endl;
+    std::cout << "hash : " << h(hp) << std::endl;
 }
 
 // default_deleter テスト
