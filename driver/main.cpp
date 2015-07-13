@@ -64,14 +64,16 @@ void Test_shared_ptr()
 {
     using tork::shared_ptr;
 
-    shared_ptr<void> p(new D);
-    tork::shared_ptr<B> sb(new D);
+    shared_ptr<B> sb(new D);
     std::cout << sb->b << std::endl;
-    tork::shared_ptr<void> sp(new D[20], tork::default_deleter<D[]>());
-    sp.reset();
-    tork::shared_ptr<void> sb2 = sb;
-    tork::shared_ptr<void> sb3(std::move(sb2));
+    shared_ptr<void> sb2 = sb;
+    shared_ptr<void> sb3(std::move(sb2));
     std::cout << sb3.use_count() << std::endl;
+
+    tork::shared_ptr<void> sp(new D[20], tork::default_deleter<D[]>());
+    auto del = tork::get_deleter<tork::default_deleter<D[]>>(sp);
+    std::cout << "deleter : " << del << std::endl;
+    sp.reset();
 
     tork::shared_ptr<int> pi(nullptr);
     tork::shared_ptr<int> pi2(new int(50));
@@ -88,6 +90,8 @@ void Test_shared_ptr()
     tork::shared_ptr<int[]> ai(new int[20]);
     ai[5] = 400;
     DebugPrint("%d\n", ai[5]);
+    std::cout << "deleter : " << tork::get_deleter<tork::default_deleter<int[]>>(ai)
+        << std::endl;
     shared_ptr<void> sv;
     sv = ai;
     DebugPrint("%d\n", tork::static_pointer_cast<int[]>(sv)[5]);

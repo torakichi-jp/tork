@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <type_traits>
+#include <typeinfo>
 #include <cassert>
 #include <ostream>
 #include <utility>
@@ -39,9 +40,16 @@ namespace impl {
 
         virtual void* get() const = 0;      // ポインタ取得
 
+        // 削除子取得
+        virtual void* get_deleter(const std::type_info&) const
+        {
+            return nullptr;
+        }
+
         // 各カウンタ取得
         int get_ref_counter() const { return ref_counter_; }
         int get_weak_counter() const { return weak_counter_; } 
+
 
         // 参照カウンタ増
         void add_ref()
@@ -95,6 +103,14 @@ namespace impl {
 
         void* get() const override { return ptr_; }  // ポインタ取得
         void destroy() override { deleter_(ptr_); }  // リソース削除
+
+        // 削除子取得
+        void* get_deleter(const type_info& tid) const override
+        {
+            return (tid == typeid(Deleter))
+                ? const_cast<void*>(static_cast<const void*>(&deleter_)) :
+                  nullptr;
+        }
 
         // ホルダ作成
         static shared_holder* create_holder(T* ptr, Deleter deleter, Alloc alloc)
@@ -368,6 +384,13 @@ public:
         return p_holder_ ? p_holder_->get_ref_counter() : 0;
     }
 
+    // 削除子取得
+    template<class D>
+    D* get_deleter() const
+    {
+        return static_cast<D*>(p_holder_->get_deleter(typeid(D)));
+    }
+
     // 所有権を持っているのが自分だけかどうか
     bool unique() const { return use_count() == 1; }
 
@@ -556,6 +579,13 @@ public:
         return p_holder_ ? p_holder_->get_ref_counter() : 0;
     }
 
+    // 削除子取得
+    template<class D>
+    D* get_deleter() const
+    {
+        return static_cast<D*>(p_holder_->get_deleter(typeid(D)));
+    }
+
     // 所有権を持っているのが自分だけかどうか
     bool unique() const { return use_count() == 1; }
 
@@ -574,6 +604,13 @@ public:
 
 };  // class shared_ptr<T[]>
 
+
+// 削除子取得
+template<class D, class T>
+D* get_deleter(const shared_ptr<T>& p)
+{
+    return p.get_deleter<D>();
+}
 
 // スタティックキャスト
 template<class T, class U>
