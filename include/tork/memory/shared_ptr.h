@@ -24,143 +24,147 @@ template<class T>
 template<class T>
     class weak_ptr;
 
-//==============================================================================
-// ポインタホルダ基底クラス
-//==============================================================================
-class shared_holder_base {
-    int ref_counter_ = 0;   // 参照カウンタ
-    int weak_counter_ = 0;  // ウィークカウンタ
+namespace impl {
 
-public:
-    shared_holder_base() { }
-    virtual ~shared_holder_base() { }
+    //==========================================================================
+    // ポインタホルダ基底クラス
+    //==========================================================================
+    class shared_holder_base {
+        int ref_counter_ = 0;   // 参照カウンタ
+        int weak_counter_ = 0;  // ウィークカウンタ
 
-    virtual void* get() const = 0;      // ポインタ取得
+    public:
+        shared_holder_base() { }
+        virtual ~shared_holder_base() { }
 
-    // 各カウンタ取得
-    int get_ref_counter() const { return ref_counter_; }
-    int get_weak_counter() const { return weak_counter_; } 
+        virtual void* get() const = 0;      // ポインタ取得
 
-    // 参照カウンタ増
-    void add_ref()
-    {
-        ++ref_counter_;
-        add_weak_ref();
-    }
+        // 各カウンタ取得
+        int get_ref_counter() const { return ref_counter_; }
+        int get_weak_counter() const { return weak_counter_; } 
 
-    // 参照カウンタ減
-    // 0になったらリソース削除
-    void release()
-    {
-        --ref_counter_;
-        if (ref_counter_ <= 0) {
-            destroy();
-        }
-        release_weak_ref();
-    }
-
-    // ウィークカウンタ増
-    void add_weak_ref()
-    {
-        ++weak_counter_;
-    }
-
-    // ウィークカウンタ減
-    // 0になったらホルダ削除
-    void release_weak_ref()
-    {
-        --weak_counter_;
-        if (weak_counter_ <= 0) {
-            destroy_holder();
-        }
-    }
-
-private:
-    virtual void destroy() = 0;         // リソース削除
-    virtual void destroy_holder() = 0;  // ホルダ自身を削除
-
-};  // class shared_holder_base
-
-//==============================================================================
-// ポインタホルダ
-//==============================================================================
-template<class T, class Deleter, class Alloc>
-class shared_holder : public shared_holder_base {
-    T* ptr_ = nullptr;  // 保持するポインタ
-    Deleter deleter_;   // 削除子
-    Alloc alloc_;       // アロケータ
-public:
-
-    void* get() const override { return ptr_; }  // ポインタ取得
-    void destroy() override { deleter_(ptr_); }  // リソース削除
-
-    // ホルダ作成
-    static shared_holder* create_holder(T* ptr, Deleter deleter, Alloc alloc)
-    {
-        // リソースがなければホルダも作らない
-        if (ptr == nullptr) {
-            return nullptr;
+        // 参照カウンタ増
+        void add_ref()
+        {
+            ++ref_counter_;
+            add_weak_ref();
         }
 
-        // 継承を利用して Alloc::construct() が shared_holder の
-        // private コンストラクタにアクセスできるようにするためのクラス
-        struct holder_impl : shared_holder<T, Deleter, Alloc> {
-            holder_impl(T* p, Deleter d, Alloc a)
-                : shared_holder(p, d, a) { }
-        };
-
-        // アロケータの再束縛
-        using Holder = holder_impl;
-        //using Holder = shared_holder<T, Deleter, Alloc>;
-        using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
-        using Traits = std::allocator_traits<Allocator>;
-        Allocator a = alloc;
-
-        holder_impl* p = Traits::allocate(a, 1);
-        if (p == nullptr) {
-            // ホルダの領域を確保できなかったら、リークを防ぐため
-            // リソースを解放しておく
-            deleter(ptr);
-            return nullptr;
+        // 参照カウンタ減
+        // 0になったらリソース削除
+        void release()
+        {
+            --ref_counter_;
+            if (ref_counter_ <= 0) {
+                destroy();
+            }
+            release_weak_ref();
         }
 
-        Traits::construct(a, p, ptr, deleter, alloc);
-        return p;
-    }
+        // ウィークカウンタ増
+        void add_weak_ref()
+        {
+            ++weak_counter_;
+        }
 
-    // ホルダ破棄（自殺するので注意して扱うこと）
-    void destroy_holder() override
-    {
-        // アロケータの再束縛
-        using Holder = shared_holder<T, Deleter, Alloc>;
-        using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
-        using Traits = std::allocator_traits<Allocator>;
-        Allocator a = alloc_;
+        // ウィークカウンタ減
+        // 0になったらホルダ削除
+        void release_weak_ref()
+        {
+            --weak_counter_;
+            if (weak_counter_ <= 0) {
+                destroy_holder();
+            }
+        }
 
-        Traits::destroy(a, this);
-        Traits::deallocate(a, this, 1);
-    }
+    private:
+        virtual void destroy() = 0;         // リソース削除
+        virtual void destroy_holder() = 0;  // ホルダ自身を削除
 
-    // コピー禁止にする
-    shared_holder(const shared_holder&) = delete;
-    shared_holder& operator =(const shared_holder&) = delete;
+    };  // class shared_holder_base
 
-private:
-    // コンストラクタ
-    shared_holder(T* ptr, Deleter deleter, Alloc alloc)
-        :ptr_(ptr), deleter_(deleter), alloc_(alloc)
-    {
+    //==========================================================================
+    // ポインタホルダ
+    //==========================================================================
+    template<class T, class Deleter, class Alloc>
+    class shared_holder : public shared_holder_base {
+        T* ptr_ = nullptr;  // 保持するポインタ
+        Deleter deleter_;   // 削除子
+        Alloc alloc_;       // アロケータ
+    public:
 
-    }
+        void* get() const override { return ptr_; }  // ポインタ取得
+        void destroy() override { deleter_(ptr_); }  // リソース削除
 
-};  // class shared_holder
+        // ホルダ作成
+        static shared_holder* create_holder(T* ptr, Deleter deleter, Alloc alloc)
+        {
+            // リソースがなければホルダも作らない
+            if (ptr == nullptr) {
+                return nullptr;
+            }
+
+            // 継承を利用して Alloc::construct() が shared_holder の
+            // private コンストラクタにアクセスできるようにするためのクラス
+            struct holder_impl : shared_holder<T, Deleter, Alloc> {
+                holder_impl(T* p, Deleter d, Alloc a)
+                    : shared_holder(p, d, a) { }
+            };
+
+            // アロケータの再束縛
+            using Holder = holder_impl;
+            //using Holder = shared_holder<T, Deleter, Alloc>;
+            using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
+            using Traits = std::allocator_traits<Allocator>;
+            Allocator a = alloc;
+
+            holder_impl* p = Traits::allocate(a, 1);
+            if (p == nullptr) {
+                // ホルダの領域を確保できなかったら、リークを防ぐため
+                // リソースを解放しておく
+                deleter(ptr);
+                return nullptr;
+            }
+
+            Traits::construct(a, p, ptr, deleter, alloc);
+            return p;
+        }
+
+        // ホルダ破棄（自殺するので注意して扱うこと）
+        void destroy_holder() override
+        {
+            // アロケータの再束縛
+            using Holder = shared_holder<T, Deleter, Alloc>;
+            using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
+            using Traits = std::allocator_traits<Allocator>;
+            Allocator a = alloc_;
+
+            Traits::destroy(a, this);
+            Traits::deallocate(a, this, 1);
+        }
+
+        // コピー禁止にする
+        shared_holder(const shared_holder&) = delete;
+        shared_holder& operator =(const shared_holder&) = delete;
+
+    private:
+        // コンストラクタ
+        shared_holder(T* ptr, Deleter deleter, Alloc alloc)
+            :ptr_(ptr), deleter_(deleter), alloc_(alloc)
+        {
+
+        }
+
+    };  // class shared_holder
+
+}   // namespace tork::impl
 
 //==============================================================================
 // 参照カウンタ式スマートポインタ
 //==============================================================================
 template <class T>
 class shared_ptr {
-    shared_holder_base* p_holder_ = nullptr;
+    impl::shared_holder_base* p_holder_ = nullptr;
 
     // T じゃない型のにアクセスできるように friend 宣言
     template<class> friend class shared_ptr;
@@ -181,7 +185,7 @@ public:
     explicit shared_ptr(U* ptr)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<U, default_deleter<U>, tork::allocator<void>>;
+        using Holder = impl::shared_holder<U, default_deleter<U>, tork::allocator<void>>;
 
         p_holder_ = Holder::create_holder(
                 ptr, default_deleter<U>(), tork::allocator<void>());
@@ -196,7 +200,7 @@ public:
     shared_ptr(U* ptr, Deleter deleter)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<U, Deleter, tork::allocator<void>>;
+        using Holder = impl::shared_holder<U, Deleter, tork::allocator<void>>;
 
         p_holder_ = Holder::create_holder(
                 ptr, deleter, tork::allocator<void>());
@@ -211,7 +215,7 @@ public:
     shared_ptr(U* ptr, Deleter deleter, Alloc alloc)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<U, Deleter, Alloc>;
+        using Holder = impl::shared_holder<U, Deleter, Alloc>;
 
         p_holder_ = Holder::create_holder(ptr, deleter, alloc);
         if (p_holder_) {
@@ -330,7 +334,7 @@ public:
     // 入れ替え
     void swap(shared_ptr& other)
     {
-        shared_holder_base* pTmp = this->p_holder_;
+        impl::shared_holder_base* pTmp = this->p_holder_;
         this->p_holder_ = other.p_holder_;
         other.p_holder_ = pTmp;
     }
@@ -394,7 +398,7 @@ public:
 //==============================================================================
 template <class T>
 class shared_ptr<T[]> {
-    shared_holder_base* p_holder_ = nullptr;
+    impl::shared_holder_base* p_holder_ = nullptr;
 
     template<class> friend class shared_ptr;
     template<class> friend class weak_ptr;
@@ -412,7 +416,7 @@ public:
     explicit shared_ptr(T* ptr)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<T, default_deleter<T[]>, tork::allocator<void>>;
+        using Holder = impl::shared_holder<T, default_deleter<T[]>, tork::allocator<void>>;
 
         p_holder_ = Holder::create_holder(
                 ptr, default_deleter<T[]>(), tork::allocator<void>());
@@ -426,7 +430,7 @@ public:
     shared_ptr(T* ptr, Deleter deleter)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<T, Deleter, tork::allocator<void>>;
+        using Holder = impl::shared_holder<T, Deleter, tork::allocator<void>>;
 
         p_holder_ = Holder::create_holder(
                 ptr, deleter, tork::allocator<void>());
@@ -440,7 +444,7 @@ public:
     shared_ptr(T* ptr, Deleter deleter, Alloc alloc)
         :p_holder_(nullptr)
     {
-        using Holder = shared_holder<T, Deleter, Alloc>;
+        using Holder = impl::shared_holder<T, Deleter, Alloc>;
 
         p_holder_ = Holder::create_holder(ptr, deleter, alloc);
         if (p_holder_) {
@@ -519,7 +523,7 @@ public:
     // 入れ替え
     void swap(shared_ptr& other)
     {
-        shared_holder_base* pTmp = this->p_holder_;
+        impl::shared_holder_base* pTmp = this->p_holder_;
         this->p_holder_ = other.p_holder_;
         other.p_holder_ = pTmp;
     }
@@ -737,81 +741,86 @@ void swap(const shared_ptr<T>& lhs, const shared_ptr<T>& rhs)
 }
 
 
-//==============================================================================
-// shared_ptr::make() 用のホルダ
-//==============================================================================
-template<class T, class Alloc>
-class shared_alloc : public shared_holder_base {
-    typename std::aligned_storage<
-        sizeof(T), std::alignment_of<T>::value>::type storage_;
-    Alloc alloc_;
+namespace impl {
 
-public:
+    //==========================================================================
+    // shared_ptr::make() 用のホルダ
+    //==========================================================================
+    template<class T, class Alloc>
+    class shared_alloc : public impl::shared_holder_base {
+        typename std::aligned_storage<
+            sizeof(T), std::alignment_of<T>::value>::type storage_;
+        Alloc alloc_;
 
-    void* get() const override {
-        return const_cast<void *>(pointer_cast<const void*>(&storage_));
-    }
-    void destroy() override { pointer_cast<T*>(&storage_)->~T(); }
+    public:
 
-    // ホルダ作成
-    template<class... Args>
-    static shared_alloc* create_holder(Alloc alloc, Args&&... args)
-    {
-        // アロケータの再束縛
-        struct holder_impl : shared_alloc<T, Alloc> {
-            holder_impl(Alloc a) : shared_alloc(a) { }
-        };
-        using Holder = holder_impl;
-        using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
-        using Traits = std::allocator_traits<Allocator>;
-        Allocator a = alloc;
+        void* get() const override {
+            return const_cast<void *>(pointer_cast<const void*>(&storage_));
+        }
+        void destroy() override { pointer_cast<T*>(&storage_)->~T(); }
 
-        holder_impl* p = Traits::allocate(a, 1);
-        if (p == nullptr) {
-            return nullptr;
+        // ホルダ作成
+        template<class... Args>
+        static shared_alloc* create_holder(Alloc alloc, Args&&... args)
+        {
+            // アロケータの再束縛
+            struct holder_impl : shared_alloc<T, Alloc> {
+                holder_impl(Alloc a) : shared_alloc(a) { }
+            };
+            using Holder = holder_impl;
+            using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
+            using Traits = std::allocator_traits<Allocator>;
+            Allocator a = alloc;
+
+            holder_impl* p = Traits::allocate(a, 1);
+            if (p == nullptr) {
+                return nullptr;
+            }
+
+            Traits::construct(a, p, alloc);
+
+            // リソース作成
+            ::new(static_cast<void*>(&(p->storage_))) T(std::forward<Args>(args)...);
+
+            return p;
         }
 
-        Traits::construct(a, p, alloc);
+        // ホルダ破棄（自殺するので注意して扱うこと）
+        void destroy_holder() override
+        {
+            // アロケータの再束縛
+            using Holder = shared_alloc<T, Alloc>;
+            using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
+            using Traits = std::allocator_traits<Allocator>;
+            Allocator a = alloc_;
 
-        // リソース作成
-        ::new(static_cast<void*>(&(p->storage_))) T(std::forward<Args>(args)...);
+            Traits::destroy(a, this);
+            Traits::deallocate(a, this, 1);
+        }
 
-        return p;
-    }
+        // コピー禁止にする
+        shared_alloc(const shared_alloc&) = delete;
+        shared_alloc& operator =(const shared_alloc&) = delete;
 
-    // ホルダ破棄（自殺するので注意して扱うこと）
-    void destroy_holder() override
-    {
-        // アロケータの再束縛
-        using Holder = shared_alloc<T, Alloc>;
-        using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
-        using Traits = std::allocator_traits<Allocator>;
-        Allocator a = alloc_;
+    private:
+        // コンストラクタ
+        shared_alloc(Alloc alloc)
+            :alloc_(alloc)
+        {
 
-        Traits::destroy(a, this);
-        Traits::deallocate(a, this, 1);
-    }
+        }
 
-    // コピー禁止にする
-    shared_alloc(const shared_alloc&) = delete;
-    shared_alloc& operator =(const shared_alloc&) = delete;
+    };  // class shared_alloc
 
-private:
-    // コンストラクタ
-    shared_alloc(Alloc alloc)
-        :alloc_(alloc)
-    {
+}   // namespace tork::impl
 
-    }
-
-};  // class shared_alloc
 
 // 効率的な shared_ptr の作成
 template<class T> template<class... Args>
 shared_ptr<T> shared_ptr<T>::make(Args&&... args)
 {
     using Alloc = tork::allocator<void>;
-    shared_alloc<T, Alloc>* p = shared_alloc<T, Alloc>::create_holder(
+    impl::shared_alloc<T, Alloc>* p = impl::shared_alloc<T, Alloc>::create_holder(
             Alloc(), std::forward<Args>(args)...);
     shared_ptr<T> sptr;
     sptr.p_holder_ = p;
@@ -823,7 +832,7 @@ shared_ptr<T> shared_ptr<T>::make(Args&&... args)
 template<class T> template<class Alloc, class... Args>
 shared_ptr<T> shared_ptr<T>::make_allocate(Alloc alloc, Args&&... args)
 {
-    shared_alloc<T, Alloc>* p = shared_alloc<T, Alloc>::create_holder(
+    impl::shared_alloc<T, Alloc>* p = impl::shared_alloc<T, Alloc>::create_holder(
             alloc, std::forward<Args>(args)...);
     shared_ptr<T> sptr;
     sptr.p_holder_ = p;
