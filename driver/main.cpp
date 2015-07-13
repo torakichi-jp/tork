@@ -4,6 +4,7 @@
 #include <tork/memory/allocator.h>
 #include <memory>
 
+// メモリリーク検出
 DebugDetectMemoryLeak(global_memory_leak_detection);
 
 void Test_OptionStream();    // OptionStream テスト
@@ -21,6 +22,7 @@ struct D : public B {
     ~D() {
         delete p;
     }
+    D(const D&) = delete;
 };
 
 // エントリポイント
@@ -87,6 +89,9 @@ void Test_shared_ptr()
     shared_ptr<B> mpb;
     mpb = mp;
     std::cout << *tork::dynamic_pointer_cast<D>(mpb)->p << std::endl;
+
+    auto alp = tork::allocate_shared<D>(std::allocator<D>(), 1234);
+    std::cout << *alp->p << std::endl;
 }
 
 // default_deleter テスト

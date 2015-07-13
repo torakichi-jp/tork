@@ -374,6 +374,9 @@ public:
     template<class... Args>
     static shared_ptr<T> make(Args&&... args);
 
+    template<class Alloc, class... Args>
+    static shared_ptr<T> make_allocate(Alloc alloc, Args&&... args);
+
 
     template<class T1, class T2>
     friend shared_ptr<T1> static_pointer_cast(const shared_ptr<T2>& r);
@@ -809,17 +812,37 @@ shared_ptr<T> shared_ptr<T>::make(Args&&... args)
 {
     using Alloc = tork::allocator<void>;
     shared_alloc<T, Alloc>* p = shared_alloc<T, Alloc>::create_holder(
-                Alloc(), std::forward<Args>(args)...);
+            Alloc(), std::forward<Args>(args)...);
     shared_ptr<T> sptr;
     sptr.p_holder_ = p;
     sptr.p_holder_->add_ref();
     return sptr;
 }
 
+// アロケータ指定版
+template<class T> template<class Alloc, class... Args>
+shared_ptr<T> shared_ptr<T>::make_allocate(Alloc alloc, Args&&... args)
+{
+    shared_alloc<T, Alloc>* p = shared_alloc<T, Alloc>::create_holder(
+            alloc, std::forward<Args>(args)...);
+    shared_ptr<T> sptr;
+    sptr.p_holder_ = p;
+    sptr.p_holder_->add_ref();
+    return sptr;
+}
+
+// 非メンバ版
 template<class T, class... Args>
 shared_ptr<T> make_shared(Args&&... args)
 {
     return shared_ptr<T>::make(std::forward<Args>(args)...);
+}
+
+// アロケータ指定版の非メンバ版
+template<class T, class Alloc, class... Args>
+shared_ptr<T> allocate_shared(Alloc alloc, Args&&... args)
+{
+    return shared_ptr<T>::make_allocate(alloc, std::forward<Args>(args)...);
 }
 
 
