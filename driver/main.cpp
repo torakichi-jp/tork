@@ -28,21 +28,18 @@ struct B {
 struct D : public B {
     int* p;
     explicit D(int n = 100) :p(T_NEW int(n)) { b = n; }
-    ~D() {
-        delete p;
-    }
+    ~D() { delete p; }
     D(const D&) = delete;
     D& operator =(const D&) = delete;
 
-    D(D&& other)
-        :B(other)
+    D(D&& other) :B(std::move(other))
     {
         p = other.p;
         other.p = nullptr;
     }
     D& operator =(D&& other)
     {
-        b = other.b;
+        B::operator =(std::move(other));
         p = other.p;
         other.p = nullptr;
     }

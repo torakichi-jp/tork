@@ -281,7 +281,7 @@ public:
     // weak_ptr から生成
     template<class U,
         class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-    shared_ptr(const weak_ptr<U>& other)
+    explicit shared_ptr(const weak_ptr<U>& other)
         :p_holder_(other.p_holder_)
     {
         if (p_holder_) {
@@ -794,7 +794,7 @@ namespace impl {
     public:
 
         void* get() const override {
-            return const_cast<void *>(pointer_cast<const void*>(&storage_));
+            return const_cast<void *>(static_cast<const void*>(&storage_));
         }
         void destroy() override { pointer_cast<T*>(&storage_)->~T(); }
 
@@ -843,11 +843,7 @@ namespace impl {
 
     private:
         // コンストラクタ
-        shared_alloc(Alloc alloc)
-            :alloc_(alloc)
-        {
-
-        }
+        shared_alloc(Alloc alloc) :alloc_(alloc) { }
 
     };  // class shared_alloc
 
@@ -894,12 +890,15 @@ shared_ptr<T> allocate_shared(Alloc alloc, Args&&... args)
 }
 
 
+}   // namespace tork
+
+
 // ハッシュの前方宣言
 template<class T> struct std::hash;
 
 // ハッシュの shared_ptr の特殊化
 template<class T>
-struct std::hash<shared_ptr<T>> {
+struct std::hash<tork::shared_ptr<T>> {
 
     typedef size_t result_type;
     typedef tork::shared_ptr<T> argument_type;
@@ -912,7 +911,6 @@ struct std::hash<shared_ptr<T>> {
 
 };  // struct std::hash<shared_ptr<T>>
 
-}   // namespace tork
 
 #endif  // TORK_MEMORY_SHARED_PTR_H_INCLUDED
 
