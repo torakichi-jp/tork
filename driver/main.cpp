@@ -17,7 +17,7 @@ struct B {
 };
 struct D : public B {
     int* p;
-    D(int n = 100) :p(T_NEW int(n)) { }
+    explicit D(int n = 100) :p(T_NEW int(n)) { }
     ~D() {
         delete p;
     }
@@ -32,12 +32,6 @@ int main()
     Test_default_deleter();
     */
     Test_shared_ptr();
-
-    tork::allocator<int> a;
-    int* p = a.allocate(10);
-    p[5] = 100;
-    std::cout << p[5] << std::endl;
-    a.deallocate(p, 10);
 
     return 0;
 }
@@ -88,6 +82,11 @@ void Test_shared_ptr()
     DebugPrint("%d, %d\n", *n, *m);
 
     std::cout << n << '\n' << m << std::endl;
+
+    auto mp = tork::shared_ptr<D>::make(987);
+    shared_ptr<B> mpb;
+    mpb = mp;
+    std::cout << *tork::dynamic_pointer_cast<D>(mpb)->p << std::endl;
 }
 
 // default_deleter テスト
