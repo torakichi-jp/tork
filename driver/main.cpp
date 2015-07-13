@@ -107,13 +107,17 @@ void Test_shared_ptr()
 
     std::cout << n << '\n' << m << std::endl;
 
-    auto mp = tork::shared_ptr<D>::make(987);
+    auto mp = shared_ptr<D>::make(987);
     shared_ptr<B> mpb;
     mpb = mp;
     std::cout << *tork::dynamic_pointer_cast<D>(mpb)->p << std::endl;
 
     auto alp = tork::allocate_shared<D>(std::allocator<D>(), 1234);
     std::cout << *alp->p << std::endl;
+
+    std::hash<shared_ptr<int>> h;
+    auto hp = shared_ptr<int>(T_NEW int(150));
+    std::cout << h(hp) << std::endl;
 }
 
 // default_deleter テスト

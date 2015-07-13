@@ -855,6 +855,24 @@ shared_ptr<T> allocate_shared(Alloc alloc, Args&&... args)
 }
 
 
+// ハッシュの前方宣言
+template<class T> struct std::hash;
+
+// ハッシュの shared_ptr の特殊化
+template<class T>
+struct std::hash<shared_ptr<T>> {
+
+    typedef size_t result_type;
+    typedef tork::shared_ptr<T> argument_type;
+
+    // ハッシュ関数
+    result_type operator ()(const argument_type& keyval)
+    {
+        return std::hash<T*>()(keyval.get());
+    }
+
+};  // struct std::hash<shared_ptr<T>>
+
 }   // namespace tork
 
 #endif  // TORK_MEMORY_SHARED_PTR_H_INCLUDED
