@@ -1,6 +1,6 @@
 ﻿#include <iostream>
 #include <tork.h>
-#include <tork/memory/shared_ptr.h>
+#include <tork/memory/weak_ptr.h>
 #include <tork/memory/allocator.h>
 #include <memory>
 
@@ -18,6 +18,7 @@ void Test_OptionStream();    // OptionStream テスト
 void Test_optional();        // optional テスト
 void Test_default_deleter(); // default_deleter テスト
 void Test_shared_ptr();      // shared_ptr テスト
+void Test_weak_ptr();        // weak_ptr テスト
 
 // テスト用の基底クラス
 struct B {
@@ -52,11 +53,43 @@ int main()
     Test_OptionStream();
     Test_optional();
     Test_default_deleter();
-    */
     Test_shared_ptr();
+    */
+    Test_weak_ptr();
 
     stopper();
     return 0;
+}
+
+// weak_ptr テスト
+void Test_weak_ptr()
+{
+    using tork::shared_ptr;
+    using tork::weak_ptr;
+    using std::cout;
+    using std::endl;
+
+    shared_ptr<B> sb(tork::make_shared<D>(123));
+    weak_ptr<B> wb;
+    wb = sb;
+    cout << wb.lock()->b << endl;
+    sb.reset();
+    cout << wb.lock() << endl;
+
+    struct CB;
+    struct CA {
+        weak_ptr<CB> p;
+        int n = 50;
+    };
+    struct CB {
+        weak_ptr<CA> p;
+        int n = 100;
+    };
+    shared_ptr<CA> ca(new CA);
+    shared_ptr<CB> cb(new CB);
+    ca->p = cb;
+    cb->p = ca;
+    cout << ca->p.lock()->n << ' ' << cb->p.lock()->n << endl;
 }
 
 // shared_ptr テスト
