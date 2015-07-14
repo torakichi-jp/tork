@@ -789,9 +789,11 @@ namespace impl {
     //==========================================================================
     template<class T, class Alloc>
     class shared_alloc : public impl::shared_holder_base {
+
+        // リソースを保持する領域
         typename std::aligned_storage<
             sizeof(T), std::alignment_of<T>::value>::type storage_;
-        Alloc alloc_;
+        Alloc alloc_;   // アロケータ
 
     public:
 
@@ -810,19 +812,17 @@ namespace impl {
             using Traits = std::allocator_traits<Allocator>;
             Allocator a = alloc;
 
+            // ホルダ領域確保
             holder_impl* p = Traits::allocate(a, 1);
             if (p == nullptr) {
                 return nullptr;
             }
 
+            // ホルダ構築
             Traits::construct(a, p, alloc);
 
-            // ポインタ設定
-            void* ptr = &p->storage_;
-            p->ptr_ = ptr;
-
-            // リソース作成
-            ::new(ptr) T(std::forward<Args>(args)...);
+            // リソース構築
+            ::new(&p->storage_) T(std::forward<Args>(args)...);
 
             return p;
         }
@@ -847,7 +847,7 @@ namespace impl {
     private:
         // コンストラクタ
         shared_alloc(Alloc alloc)
-            :shared_holder_base(nullptr), alloc_(alloc)
+            :shared_holder_base(&storage_), alloc_(alloc)
         {
 
         }
