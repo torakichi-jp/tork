@@ -34,17 +34,21 @@ namespace impl {
         int ref_counter_ = 0;   // 参照カウンタ
         int weak_counter_ = 0;  // ウィークカウンタ
 
-    public:
-        shared_holder_base() { }
-        virtual ~shared_holder_base() { }
+    protected:
+        void* ptr_ = nullptr;   // 保持するポインタ
 
-        virtual void* get() const = 0;      // ポインタ取得
+    public:
+        shared_holder_base(void* ptr) : ptr_(ptr) { }
+        virtual ~shared_holder_base() { }
 
         // 削除子取得
         virtual void* get_deleter(const std::type_info&) const
         {
             return nullptr;
         }
+
+        // ポインタ取得
+        void* get() { return ptr_; }
 
         // 各カウンタ取得
         int get_ref_counter() const { return ref_counter_; }
@@ -98,13 +102,11 @@ namespace impl {
     //==========================================================================
     template<class T, class Deleter, class Alloc>
     class shared_holder : public shared_holder_base {
-        T* ptr_ = nullptr;  // 保持するポインタ
         Deleter deleter_;   // 削除子
         Alloc alloc_;       // アロケータ
     public:
 
-        void* get() const override { return ptr_; }  // ポインタ取得
-        void destroy() override { deleter_(ptr_); }  // リソース削除
+        void destroy() override { deleter_(static_cast<T*>(ptr_)); }  // リソース削除
 
         // 削除子取得
         void* get_deleter(const type_info& tid) const override
@@ -168,7 +170,7 @@ namespace impl {
     private:
         // コンストラクタ
         shared_holder(T* ptr, Deleter deleter, Alloc alloc)
-            :ptr_(ptr), deleter_(deleter), alloc_(alloc)
+            :shared_holder_base(ptr), deleter_(deleter), alloc_(alloc)
         {
 
         }
@@ -793,9 +795,6 @@ namespace impl {
 
     public:
 
-        void* get() const override {
-            return const_cast<void *>(static_cast<const void*>(&storage_));
-        }
         void destroy() override { pointer_cast<T*>(&storage_)->~T(); }
 
         // ホルダ作成
@@ -818,8 +817,12 @@ namespace impl {
 
             Traits::construct(a, p, alloc);
 
+            // ポインタ設定
+            void* ptr = &p->storage_;
+            p->ptr_ = ptr;
+
             // リソース作成
-            ::new(static_cast<void*>(&(p->storage_))) T(std::forward<Args>(args)...);
+            ::new(ptr) T(std::forward<Args>(args)...);
 
             return p;
         }
@@ -843,7 +846,11 @@ namespace impl {
 
     private:
         // コンストラクタ
-        shared_alloc(Alloc alloc) :alloc_(alloc) { }
+        shared_alloc(Alloc alloc)
+            :shared_holder_base(nullptr), alloc_(alloc)
+        {
+
+        }
 
     };  // class shared_alloc
 
