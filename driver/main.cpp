@@ -4,6 +4,9 @@
 #include <tork/memory/allocator.h>
 #include <memory>
 
+using std::cout;
+using std::endl;
+
 // メモリリーク検出
 DebugDetectMemoryLeak(global_memory_leak_detection);
 
@@ -29,10 +32,13 @@ struct B {
 struct D : public B {
     int* p;
     explicit D(int n = 100) :p(T_NEW int(n)) { b = n; }
-    ~D() { delete p; }
+    ~D() { delete p; }  // あえてvirtualにしていない
+
+    // コピー禁止
     D(const D&) = delete;
     D& operator =(const D&) = delete;
 
+    // ムーブでポインタ移動
     D(D&& other) :B(std::move(other))
     {
         p = other.p;
@@ -53,8 +59,8 @@ int main()
     Test_OptionStream();
     Test_optional();
     Test_default_deleter();
-    Test_shared_ptr();
     */
+    Test_shared_ptr();
     Test_weak_ptr();
 
     stopper();
@@ -66,8 +72,8 @@ void Test_weak_ptr()
 {
     using tork::shared_ptr;
     using tork::weak_ptr;
-    using std::cout;
-    using std::endl;
+
+    cout << "*** weak_ptr test ***" << endl;
 
     shared_ptr<B> sb(tork::make_shared<D>(123));
     weak_ptr<B> wb;
@@ -76,6 +82,7 @@ void Test_weak_ptr()
     sb.reset();
     cout << wb.lock() << endl;
 
+    // 循環参照させてみる
     struct CB;
     struct CA {
         weak_ptr<CB> p;
@@ -97,37 +104,43 @@ void Test_shared_ptr()
 {
     using tork::shared_ptr;
 
-    shared_ptr<B> sb(new D);
-    std::cout << sb->b << std::endl;
+    cout << "*** shared_ptr test ***" << endl;
+
+    shared_ptr<B> sb(new D(5));
+    assert(sb->b == 5);
     shared_ptr<void> sb2 = sb;
     shared_ptr<void> sb3(std::move(sb2));
-    std::cout << sb3.use_count() << std::endl;
+    assert(sb3.use_count() == 2);
 
-    tork::shared_ptr<void> sp(new D[20], tork::default_deleter<D[]>());
+    shared_ptr<void> sp(new D[20], tork::default_deleter<D[]>());
     auto del = tork::get_deleter<tork::default_deleter<D[]>>(sp);
     std::cout << "deleter : " << del << std::endl;
     sp.reset();
 
-    tork::shared_ptr<int> pi(nullptr);
-    tork::shared_ptr<int> pi2(new int(50));
+    shared_ptr<int> pi(nullptr);
+    shared_ptr<int> pi2(new int(50));
     pi = std::move(pi2);
-    DebugPrint("%d, %d\n", *pi, pi2.use_count());
+    assert(*pi == 50);
+    assert(pi2 == nullptr);
 
-    tork::shared_ptr<const D> sc(new D);
-    tork::shared_ptr<B> sd = tork::const_pointer_cast<D>(sc);
-    DebugPrint("%d, %d\n", sd.use_count(), sd->b);
+    shared_ptr<const D> sc(new D);
+    shared_ptr<B> sd = tork::const_pointer_cast<D>(sc);
+    cout << "sd.use_count : " << sd.use_count() << endl;
+    cout << "sd->b : " << sd->b << endl;
+    assert(sd == tork::dynamic_pointer_cast<D>(sd));
 
     tork::shared_ptr<B> sbp(T_NEW B);
-    DebugPrint("dynamic_pointer_cast : %p\n", tork::dynamic_pointer_cast<D>(sbp).get());
+    assert(nullptr == tork::dynamic_pointer_cast<D>(sbp));
 
     tork::shared_ptr<int[]> ai(new int[20]);
     ai[5] = 400;
-    DebugPrint("%d\n", ai[5]);
-    std::cout << "deleter : " << tork::get_deleter<tork::default_deleter<int[]>>(ai)
-        << std::endl;
+    assert(ai[5] == 400);
+    cout << "deleter : "
+        << tork::get_deleter<tork::default_deleter<int[]>>(ai)
+        << endl;
     shared_ptr<void> sv;
     sv = ai;
-    DebugPrint("%d\n", tork::static_pointer_cast<int[]>(sv)[5]);
+    cout << "sv[5] : " << tork::static_pointer_cast<int[]>(sv)[5] << endl;
 
     shared_ptr<B> b;
     shared_ptr<D> d(new D);
@@ -140,9 +153,7 @@ void Test_shared_ptr()
     shared_ptr<int> n(new int(10));
     shared_ptr<int> m(new int(20));
     std::swap(n, m);
-    DebugPrint("%d, %d\n", *n, *m);
-
-    std::cout << n << ' ' << m << std::endl;
+    assert(*n == 20 && *m == 10);
 
     auto mp = shared_ptr<D>::make(987);
     shared_ptr<B> mpb;
