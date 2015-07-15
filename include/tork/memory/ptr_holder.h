@@ -135,6 +135,7 @@ namespace tork {
             }
 
             Traits::construct(a, p, ptr, deleter, alloc);
+            p->add_ref();
             return p;
         }
 
@@ -205,6 +206,7 @@ namespace tork {
             // リソース構築
             ::new(&p->storage_) T(std::forward<Args>(args)...);
 
+            p->add_ref();
             return p;
         }
 

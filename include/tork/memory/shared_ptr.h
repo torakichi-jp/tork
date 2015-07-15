@@ -54,9 +54,6 @@ public:
 
         p_holder_ = Holder::create_holder(
                 ptr, default_deleter<U>(), tork::allocator<void>());
-        if (p_holder_) {
-            p_holder_->add_ref();
-        }
     }
 
     // ポインタとカスタム削除子設定
@@ -69,9 +66,6 @@ public:
 
         p_holder_ = Holder::create_holder(
                 ptr, deleter, tork::allocator<void>());
-        if (p_holder_) {
-            p_holder_->add_ref();
-        }
     }
 
     // ポインタ、カスタム削除子、アロケータ設定
@@ -83,9 +77,6 @@ public:
         using Holder = impl::ptr_holder<U, Deleter, Alloc>;
 
         p_holder_ = Holder::create_holder(ptr, deleter, alloc);
-        if (p_holder_) {
-            p_holder_->add_ref();
-        }
     }
 
     // nullptr
@@ -292,9 +283,6 @@ public:
 
         p_holder_ = Holder::create_holder(
                 ptr, default_deleter<T[]>(), tork::allocator<void>());
-        if (p_holder_) {
-            p_holder_->add_ref();
-        }
     }
 
     // ポインタとカスタム削除子設定
@@ -306,9 +294,6 @@ public:
 
         p_holder_ = Holder::create_holder(
                 ptr, deleter, tork::allocator<void>());
-        if (p_holder_) {
-            p_holder_->add_ref();
-        }
     }
 
     // ポインタ、カスタム削除子、アロケータ設定
@@ -319,9 +304,6 @@ public:
         using Holder = impl::ptr_holder<T, Deleter, Alloc>;
 
         p_holder_ = Holder::create_holder(ptr, deleter, alloc);
-        if (p_holder_) {
-            p_holder_->add_ref();
-        }
     }
 
     // nullptr
@@ -637,7 +619,6 @@ shared_ptr<T> shared_ptr<T>::make(Args&&... args)
             Alloc(), std::forward<Args>(args)...);
     shared_ptr<T> sptr;
     sptr.p_holder_ = p;
-    sptr.p_holder_->add_ref();
     return sptr;
 }
 
@@ -649,7 +630,6 @@ shared_ptr<T> shared_ptr<T>::make_allocate(Alloc alloc, Args&&... args)
             alloc, std::forward<Args>(args)...);
     shared_ptr<T> sptr;
     sptr.p_holder_ = p;
-    sptr.p_holder_->add_ref();
     return sptr;
 }
 
