@@ -7,7 +7,6 @@
 #ifndef TORK_MEMORY_SHARED_PTR_H_INCLUDED
 #define TORK_MEMORY_SHARED_PTR_H_INCLUDED
 
-#include <memory>
 #include <type_traits>
 #include <typeinfo>
 #include <cassert>
@@ -18,12 +17,6 @@
 #include "../define.h"
 
 namespace tork {
-
-// 前方宣言
-template<class T>
-    class shared_ptr;
-template<class T>
-    class weak_ptr;
 
 namespace impl {
 
@@ -178,7 +171,7 @@ namespace impl {
     };  // class ptr_holder
 
     //==========================================================================
-    // shared_ptr::make() 用のホルダ
+    // リソース領域と同時にホルダ領域を確保するホルダ
     //==========================================================================
     template<class T, class Alloc>
     class ptr_holder_alloc : public impl::ptr_holder_base {
@@ -248,6 +241,11 @@ namespace impl {
     };  // class ptr_holder_alloc
 
 }   // namespace tork::impl
+
+
+// 前方宣言
+template<class T>
+    class weak_ptr;
 
 //==============================================================================
 // 参照カウンタ式スマートポインタ
