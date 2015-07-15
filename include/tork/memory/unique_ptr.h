@@ -6,7 +6,7 @@
 #ifndef TORK_MEMORY_UNIQUE_PTR_INCLUDED
 #define TORK_MEMORY_UNIQUE_PTR_INCLUDED
 
-#include "shared_ptr.h"
+#include "ptr_holder.h"
 
 namespace tork {
 

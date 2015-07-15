@@ -78,6 +78,9 @@
     <ClInclude Include="..\include\tork\memory\unique_ptr.h">
       <Filter>ヘッダー ファイル\tork\memory</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\tork\memory\ptr_holder.h">
+      <Filter>ヘッダー ファイル\tork\memory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <cassert>
 
 #include <tork/memory.h>
@@ -7,22 +7,29 @@
 using std::cout;
 using std::endl;
 
-// ƒeƒXƒg—p‚ÌŠî’êƒNƒ‰ƒX
+// ãƒ†ã‚¹ãƒˆç”¨ã®åŸºåº•ã‚¯ãƒ©ã‚¹
 struct B {
     int b = 20;
-    virtual ~B() { }
+
+    // ã‚ãˆã¦virtualãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã«ã—ã¦ã„ãªã„
+    ~B() { }
+
+    // dynamic_cast ãŒã§ãã‚‹ã‚ˆã†ã«virtualé–¢æ•°å®šç¾©
+    virtual void dummy() { }
 };
-// ƒeƒXƒg—p‚Ì”h¶ƒNƒ‰ƒX
+// ãƒ†ã‚¹ãƒˆç”¨ã®æ´¾ç”Ÿã‚¯ãƒ©ã‚¹
 struct D : public B {
     int* p;
-    explicit D(int n = 100) :p(T_NEW int(n)) { b = n; }
-    ~D() { delete p; }  // ‚ ‚¦‚Ävirtual‚É‚µ‚Ä‚¢‚È‚¢
 
-    // ƒRƒs[‹Ö~
+    explicit D(int n = 100) :p(T_NEW int(n)) { b = n; }
+    
+    ~D() { delete p; }
+
+    // ã‚³ãƒ”ãƒ¼ç¦æ­¢
     D(const D&) = delete;
     D& operator =(const D&) = delete;
 
-    // ƒ€[ƒu‚Åƒ|ƒCƒ“ƒ^ˆÚ“®
+    // ãƒ ãƒ¼ãƒ–ã§ãƒã‚¤ãƒ³ã‚¿ç§»å‹•
     D(D&& other) :B(std::move(other))
     {
         p = other.p;
@@ -36,7 +43,7 @@ struct D : public B {
     }
 };
 
-// weak_ptr ƒeƒXƒg
+// weak_ptr ãƒ†ã‚¹ãƒˆ
 void Test_weak_ptr()
 {
     using tork::shared_ptr;
@@ -51,7 +58,7 @@ void Test_weak_ptr()
     sb.reset();
     cout << wb.lock() << endl;
 
-    // zŠÂQÆ‚³‚¹‚Ä‚İ‚é
+    // å¾ªç’°å‚ç…§ã•ã›ã¦ã¿ã‚‹
     struct CB;
     struct CA {
         weak_ptr<CB> p;
@@ -68,7 +75,7 @@ void Test_weak_ptr()
     cout << ca->p.lock()->n << ' ' << cb->p.lock()->n << endl;
 }
 
-// shared_ptr ƒeƒXƒg
+// shared_ptr ãƒ†ã‚¹ãƒˆ
 void Test_shared_ptr()
 {
     using tork::shared_ptr;
@@ -137,7 +144,7 @@ void Test_shared_ptr()
     std::cout << "hash : " << h(hp) << std::endl;
 }
 
-// default_deleter ƒeƒXƒg
+// default_deleter ãƒ†ã‚¹ãƒˆ
 void Test_default_deleter()
 {
     B* p = new D[10];

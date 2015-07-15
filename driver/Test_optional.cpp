@@ -1,7 +1,7 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <tork/optional.h>
 
-// optional ƒeƒXƒg
+// optional ãƒ†ã‚¹ãƒˆ
 void Test_optional()
 {
     using tork::optional;

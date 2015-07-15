@@ -1,8 +1,8 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <tork/app/OptionStream.h>
 #include <tork/define.h>
 
-// OptionStream ƒeƒXƒg
+// OptionStream ãƒ†ã‚¹ãƒˆ
 void Test_OptionStream()
 {
     using namespace tork;
