@@ -16,7 +16,7 @@ namespace tork {
 //==============================================================================
 template<class T>
 class weak_ptr {
-    impl::shared_holder_base* p_holder_ = nullptr;
+    impl::ptr_holder_base* p_holder_ = nullptr;
 
     // T じゃない型のにアクセスできるように friend 宣言
     template<class> friend class shared_ptr;
@@ -125,7 +125,7 @@ public:
     // スワップ
     void swap(weak_ptr& other)
     {
-        impl::shared_holder_base* pTmp = other.p_holder_;
+        impl::ptr_holder_base* pTmp = other.p_holder_;
         other.p_holder_ = p_holder_;
         p_holder_ = pTmp;
     }
