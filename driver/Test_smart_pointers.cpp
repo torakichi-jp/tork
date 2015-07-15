@@ -43,6 +43,19 @@ struct D : public B {
     }
 };
 
+// unique_ptr テスト
+void Test_unique_ptr()
+{
+    using tork::unique_ptr;
+
+    cout << "*** unique_ptr test ***" << endl;
+
+    unique_ptr<int> emp;
+
+    unique_ptr<int> ub(new int(1234));
+    unique_ptr<int> ub2(std::move(ub));
+}
+
 // weak_ptr テスト
 void Test_weak_ptr()
 {
@@ -88,7 +101,7 @@ void Test_shared_ptr()
     shared_ptr<void> sb3(std::move(sb2));
     assert(sb3.use_count() == 2);
 
-    shared_ptr<void> sp(new D[20], tork::default_deleter<D[]>());
+    shared_ptr<void> sp(T_NEW D[20], tork::default_deleter<D[]>());
     auto del = tork::get_deleter<tork::default_deleter<D[]>>(sp);
     std::cout << "deleter : " << del << std::endl;
     sp.reset();
@@ -151,8 +164,8 @@ void Test_default_deleter()
     tork::default_deleter<B[]> da;
     da(p);
 
-    tork::default_deleter<B> db;
-    db(new D);
+    //tork::default_deleter<B> db;
+    //db(new D);
 
     tork::default_deleter<D> dd;
     tork::default_deleter<B> db2 = dd;

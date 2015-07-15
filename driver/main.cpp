@@ -17,6 +17,7 @@ void Test_optional();        // optional テスト
 void Test_default_deleter(); // default_deleter テスト
 void Test_shared_ptr();      // shared_ptr テスト
 void Test_weak_ptr();        // weak_ptr テスト
+void Test_unique_ptr();      // unique_ptr テスト
 
 
 // エントリポイント
@@ -29,6 +30,7 @@ int main()
     */
     Test_shared_ptr();
     Test_weak_ptr();
+    Test_unique_ptr();
 
     stopper();
     return 0;
