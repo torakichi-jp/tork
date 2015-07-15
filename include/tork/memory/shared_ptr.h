@@ -177,6 +177,76 @@ namespace impl {
 
     };  // class ptr_holder
 
+    //==========================================================================
+    // shared_ptr::make() 用のホルダ
+    //==========================================================================
+    template<class T, class Alloc>
+    class ptr_holder_alloc : public impl::ptr_holder_base {
+
+        // リソースを保持する領域
+        typename std::aligned_storage<
+            sizeof(T), std::alignment_of<T>::value>::type storage_;
+        Alloc alloc_;   // アロケータ
+
+    public:
+
+        void destroy() override { pointer_cast<T*>(&storage_)->~T(); }
+
+        // ホルダ作成
+        template<class... Args>
+        static ptr_holder_alloc* create_holder(Alloc alloc, Args&&... args)
+        {
+            // アロケータの再束縛
+            struct holder_impl : ptr_holder_alloc<T, Alloc> {
+                holder_impl(Alloc a) : ptr_holder_alloc(a) { }
+            };
+            using Holder = holder_impl;
+            using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
+            using Traits = std::allocator_traits<Allocator>;
+            Allocator a = alloc;
+
+            // ホルダ領域確保
+            holder_impl* p = Traits::allocate(a, 1);
+            if (p == nullptr) {
+                return nullptr;
+            }
+
+            // ホルダ構築
+            Traits::construct(a, p, alloc);
+
+            // リソース構築
+            ::new(&p->storage_) T(std::forward<Args>(args)...);
+
+            return p;
+        }
+
+        // ホルダ破棄（自殺するので注意して扱うこと）
+        void destroy_holder() override
+        {
+            // アロケータの再束縛
+            using Holder = ptr_holder_alloc<T, Alloc>;
+            using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
+            using Traits = std::allocator_traits<Allocator>;
+            Allocator a = alloc_;
+
+            Traits::destroy(a, this);
+            Traits::deallocate(a, this, 1);
+        }
+
+        // コピー禁止にする
+        ptr_holder_alloc(const ptr_holder_alloc&) = delete;
+        ptr_holder_alloc& operator =(const ptr_holder_alloc&) = delete;
+
+    private:
+        // コンストラクタ
+        ptr_holder_alloc(Alloc alloc)
+            :ptr_holder_base(&storage_), alloc_(alloc)
+        {
+
+        }
+
+    };  // class ptr_holder_alloc
+
 }   // namespace tork::impl
 
 //==============================================================================
@@ -782,87 +852,13 @@ void swap(const shared_ptr<T>& lhs, const shared_ptr<T>& rhs)
 }
 
 
-namespace impl {
-
-    //==========================================================================
-    // shared_ptr::make() 用のホルダ
-    //==========================================================================
-    template<class T, class Alloc>
-    class shared_alloc : public impl::ptr_holder_base {
-
-        // リソースを保持する領域
-        typename std::aligned_storage<
-            sizeof(T), std::alignment_of<T>::value>::type storage_;
-        Alloc alloc_;   // アロケータ
-
-    public:
-
-        void destroy() override { pointer_cast<T*>(&storage_)->~T(); }
-
-        // ホルダ作成
-        template<class... Args>
-        static shared_alloc* create_holder(Alloc alloc, Args&&... args)
-        {
-            // アロケータの再束縛
-            struct holder_impl : shared_alloc<T, Alloc> {
-                holder_impl(Alloc a) : shared_alloc(a) { }
-            };
-            using Holder = holder_impl;
-            using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
-            using Traits = std::allocator_traits<Allocator>;
-            Allocator a = alloc;
-
-            // ホルダ領域確保
-            holder_impl* p = Traits::allocate(a, 1);
-            if (p == nullptr) {
-                return nullptr;
-            }
-
-            // ホルダ構築
-            Traits::construct(a, p, alloc);
-
-            // リソース構築
-            ::new(&p->storage_) T(std::forward<Args>(args)...);
-
-            return p;
-        }
-
-        // ホルダ破棄（自殺するので注意して扱うこと）
-        void destroy_holder() override
-        {
-            // アロケータの再束縛
-            using Holder = shared_alloc<T, Alloc>;
-            using Allocator = std::allocator_traits<Alloc>::rebind_alloc<Holder>;
-            using Traits = std::allocator_traits<Allocator>;
-            Allocator a = alloc_;
-
-            Traits::destroy(a, this);
-            Traits::deallocate(a, this, 1);
-        }
-
-        // コピー禁止にする
-        shared_alloc(const shared_alloc&) = delete;
-        shared_alloc& operator =(const shared_alloc&) = delete;
-
-    private:
-        // コンストラクタ
-        shared_alloc(Alloc alloc)
-            :ptr_holder_base(&storage_), alloc_(alloc)
-        {
-
-        }
-
-    };  // class shared_alloc
-
-}   // namespace tork::impl
-
 
 // 効率的な shared_ptr の作成
 template<class T> template<class... Args>
 shared_ptr<T> shared_ptr<T>::make(Args&&... args)
 {
     using Alloc = tork::allocator<void>;
-    impl::shared_alloc<T, Alloc>* p = impl::shared_alloc<T, Alloc>::create_holder(
+    auto p = impl::ptr_holder_alloc<T, Alloc>::create_holder(
             Alloc(), std::forward<Args>(args)...);
     shared_ptr<T> sptr;
     sptr.p_holder_ = p;
@@ -874,7 +870,7 @@ shared_ptr<T> shared_ptr<T>::make(Args&&... args)
 template<class T> template<class Alloc, class... Args>
 shared_ptr<T> shared_ptr<T>::make_allocate(Alloc alloc, Args&&... args)
 {
-    impl::shared_alloc<T, Alloc>* p = impl::shared_alloc<T, Alloc>::create_holder(
+    auto p = impl::ptr_holder_alloc<T, Alloc>::create_holder(
             alloc, std::forward<Args>(args)...);
     shared_ptr<T> sptr;
     sptr.p_holder_ = p;
