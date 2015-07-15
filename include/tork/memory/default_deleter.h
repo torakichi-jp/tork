@@ -14,6 +14,9 @@ namespace tork {
 // 通常のdelete用
 template<class T>
 struct default_deleter {
+
+    typedef T* pointer;
+
     default_deleter() NO_EXCEPT { }
     ~default_deleter() { }
 
@@ -24,7 +27,7 @@ struct default_deleter {
 
     }
 
-    void operator ()(T* ptr) const
+    void operator ()(pointer ptr) const
     {
         static_assert(sizeof(T) > 0,
                 "can't delete an incomplete type");
@@ -35,10 +38,13 @@ struct default_deleter {
 // 配列形式の特殊化
 template<class T>
 struct default_deleter<T[]> {
+
+    typedef T* pointer;
+
     default_deleter() NO_EXCEPT { }
     ~default_deleter() { }
 
-    void operator ()(T* ptr) const
+    void operator ()(pointer ptr) const
     {
         static_assert(sizeof(T) > 0,
                 "can't delete an incomplete type");

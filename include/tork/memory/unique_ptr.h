@@ -6,16 +6,28 @@
 #ifndef TORK_MEMORY_UNIQUE_PTR_INCLUDED
 #define TORK_MEMORY_UNIQUE_PTR_INCLUDED
 
-#include "ptr_holder.h"
-
 namespace tork {
+
+    namespace impl {
+
+        struct deleter_has_pointer {
+            template<class T, class D>
+                static typename D::pointer check(typename D::pointer);
+
+            template<class T, class D>
+                static T* check(...);
+        };
+
+    }   // namespace tork::impl
+
 
 template<class T, class D = default_deleter<T>>
 class unique_ptr {
 public:
     typedef T element_type;
     typedef D deleter_type;
-    typedef T* pointer;
+
+    typedef decltype(impl::deleter_has_pointer::check<T, D>(nullptr)) pointer;
 
 private:
     pointer ptr_ = nullptr;
