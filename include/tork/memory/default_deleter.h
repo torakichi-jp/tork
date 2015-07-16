@@ -6,7 +6,6 @@
 #ifndef TORK_MEMORY_DEFAULT_DELETER_H_INCLUDED
 #define TORK_MEMORY_DEFAULT_DELETER_H_INCLUDED
 
-#include "../define.h"
 #include <type_traits>
 
 namespace tork {
@@ -17,12 +16,12 @@ struct default_deleter {
 
     typedef T* pointer;
 
-    default_deleter() NO_EXCEPT { }
+    default_deleter() { }
     ~default_deleter() { }
 
     template<class U,
         class = typename std::enable_if<std::is_convertible<U*, T*>::value, void>::type>
-    default_deleter(const default_deleter<U>&) NO_EXCEPT
+    default_deleter(const default_deleter<U>&)
     {
 
     }
@@ -41,7 +40,7 @@ struct default_deleter<T[]> {
 
     typedef T* pointer;
 
-    default_deleter() NO_EXCEPT { }
+    default_deleter() { }
     ~default_deleter() { }
 
     void operator ()(pointer ptr) const
