@@ -58,6 +58,7 @@ public:
 
     }
 
+    // 別の型からのムーブコンストラクタ
     template<class U, class E,
         class = typename std::enable_if<!std::is_array<U>::value
             && std::is_convertible<typename unique_ptr<U, E>::pointer,
@@ -83,6 +84,42 @@ public:
         }
     }
 
+    // ムーブ代入
+    unique_ptr& operator =(unique_ptr&& other)
+    {
+        assert(ptr_ != other.ptr_ || ptr_ == nullptr);
+        reset(other.release());
+        deleter_ = std::move(other.deleter_);
+        return *this;
+    }
+
+    // 別の型からのムーブ代入
+    template<class U, class E,
+        class = typename std::enable_if<
+            std::convertible<unique_ptr<U, E>::pointer, pointer>::value
+            && !std::is_array<U>::value,
+        void>::type>
+    unique_ptr& operator =(unique_ptr<U, E>&& other)
+    {
+        assert(ptr_ != other.get() || ptr_ == nullptr);
+        reset(other.release());
+        deleter_ = std::forward<E>(other.get_deleter());
+        return *this;
+    }
+
+    // nullptr代入
+    unique_ptr& operator =(nullptr_t)
+    {
+        reset();
+        return *this;
+    }
+
+    // コピー代入禁止
+    unique_ptr& operator =(const unique_ptr&) = delete;
+
+    // リソース取得
+    pointer get() const { return ptr_; }
+
     // リソースの所有権放棄
     pointer release()
     {
@@ -94,6 +131,16 @@ public:
     // 削除子への参照取得
     deleter_type& get_deleter() { return deleter_; }
     const deleter_type& get_deleter() const { return deleter_; }
+
+    // リセット
+    void reset(pointer p = pointer())
+    {
+        pointer pOld = ptr_;
+        ptr_ = p;
+        if (pOld) {
+            deleter_(pOld);
+        }
+    }
 
 };  // class unique_ptr
 
