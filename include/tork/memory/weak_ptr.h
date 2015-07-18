@@ -11,6 +11,16 @@
 
 namespace tork {
 
+// 前方宣言
+template<class T>
+class enable_shared_from_this;
+namespace impl {
+    template<class T1>
+    void do_enable_shared(
+            enable_shared_from_this<T1>* pEs,
+            impl::ptr_holder_base* pHolder);
+}
+
 //==============================================================================
 // ウィークポインタ
 //==============================================================================
@@ -153,6 +163,11 @@ public:
     {
         return expired() ? shared_ptr<T>() : shared_ptr<T>(*this);
     }
+
+    template<class T1>
+    friend void impl::do_enable_shared(
+            enable_shared_from_this<T1>* pEs,
+            impl::ptr_holder_base* pHolder);
 
 };  // class weak_ptr
 

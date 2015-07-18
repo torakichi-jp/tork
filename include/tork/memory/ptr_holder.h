@@ -13,7 +13,20 @@
 #include <utility>
 
 namespace tork {
+
+    // 前方宣言
+    template<class T>
+    class enable_shared_from_this;
+
     namespace impl {
+
+    // 前方宣言
+    class ptr_holder_base;
+    template<class T1>
+    void do_enable_shared(
+            enable_shared_from_this<T1>* pEs,
+            impl::ptr_holder_base* pHolder);
+    void do_enable_shared(const volatile void*, const volatile void*);
 
     //==========================================================================
     // ポインタホルダ基底クラス
@@ -136,6 +149,7 @@ namespace tork {
 
             Traits::construct(a, p, ptr, deleter, alloc);
             p->add_ref();
+            impl::do_enable_shared(ptr, p);
             return p;
         }
 
@@ -204,9 +218,10 @@ namespace tork {
             Traits::construct(a, p, alloc);
 
             // リソース構築
-            ::new(&p->storage_) T(std::forward<Args>(args)...);
+            T* pRes = ::new(&p->storage_) T(std::forward<Args>(args)...);
 
             p->add_ref();
+            impl::do_enable_shared(pRes, p);
             return p;
         }
 

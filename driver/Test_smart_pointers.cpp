@@ -43,6 +43,23 @@ struct D : public B {
     }
 };
 
+// enable_shared_from_this テスト
+void Test_enable_shared_from_this()
+{
+    struct X : public tork::enable_shared_from_this<X> {
+        tork::shared_ptr<X> f()
+        {
+            // thisを指すshared_ptrオブジェクトを作る
+            return shared_from_this();
+        }
+    };
+
+    auto p = tork::make_shared<X>();
+    auto q = p->f();
+
+    assert(p == q);
+}
+
 // unique_ptr テスト
 void Test_unique_ptr()
 {
