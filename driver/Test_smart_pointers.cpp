@@ -198,8 +198,8 @@ void Test_shared_ptr()
 // default_deleter テスト
 void Test_default_deleter()
 {
-    B* p = new D[10];
-    tork::default_deleter<B[]> da;
+    D* p = new D[10];
+    tork::default_deleter<D[]> da;
     da(p);
 
     //tork::default_deleter<B> db;
