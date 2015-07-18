@@ -647,6 +647,21 @@ shared_ptr<T> allocate_shared(Alloc alloc, Args&&... args)
     return shared_ptr<T>::make_allocate(alloc, std::forward<Args>(args)...);
 }
 
+// enable_shared_from_this
+// TODO: shared_ptr 側で T が enable_shared_from_this から派生しているかどうかを
+// 調べて this を適切に設定する必要がある
+template<class T> class enable_shared_from_this {
+private:
+    weak_ptr<T> weak_this_;
+protected:
+    enable_shared_from_this() : weak_this_() { }
+    enable_shared_from_this(enable_shared_from_this const &) { }
+    enable_shared_from_this& operator=(enable_shared_from_this const &) { return *this; }
+    ~enable_shared_from_this() { }
+public:
+    shared_ptr<T> shared_from_this() { return shared_ptr<T>(weak_this_); }
+    shared_ptr<T const> shared_from_this() const { return shared_ptr<T const>(weak_this_); }
+};
 
 }   // namespace tork
 
