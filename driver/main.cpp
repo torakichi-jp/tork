@@ -27,9 +27,10 @@ int main()
     Test_OptionStream();
     Test_optional();
     Test_default_deleter();
-    */
+
     Test_shared_ptr();
     Test_weak_ptr();
+    */
     Test_unique_ptr();
 
     stopper();

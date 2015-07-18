@@ -6,6 +6,8 @@
 #ifndef TORK_MEMORY_UNIQUE_PTR_INCLUDED
 #define TORK_MEMORY_UNIQUE_PTR_INCLUDED
 
+#include "default_deleter.h"
+
 namespace tork {
 
     namespace impl {
@@ -21,7 +23,7 @@ namespace tork {
     }   // namespace tork::impl
 
 
-template<class T, class D = default_deleter<T>>
+template<class T, class D = tork::default_deleter<T>>
 class unique_ptr {
 public:
     typedef T element_type;
@@ -41,7 +43,7 @@ public:
 
     // ポインタを受け取るコンストラクタ
     explicit unique_ptr(pointer ptr)
-        :ptr_(ptr), deleter_(default_deleter<T>()) { }
+        :ptr_(ptr), deleter_(deleter_type()) { }
 
     // ポインタと削除子への参照
     unique_ptr(pointer ptr,
@@ -182,6 +184,136 @@ public:
     }
 
 };  // class unique_ptr
+
+//==============================================================================
+// 配列版の特殊化
+//==============================================================================
+template<class T, class D>
+class unique_ptr<T[], D> {
+public:
+    typedef T element_type;
+    typedef D deleter_type;
+
+    // 戻り値型を decltype で取得
+    typedef decltype(impl::deleter_has_pointer::check<T, D>(nullptr)) pointer;
+
+private:
+    pointer ptr_ = pointer();
+    deleter_type deleter_;
+
+public:
+
+    // デフォルトコンストラクタ
+    unique_ptr() : ptr_(pointer()) { }
+
+    // ポインタを受け取るコンストラクタ
+    explicit unique_ptr(pointer ptr)
+        :ptr_(ptr), deleter_(deleter_type()) { }
+
+    // ポインタと削除子への参照
+    unique_ptr(pointer ptr,
+            typename std::conditional<std::is_reference<D>::value, D,
+                const typename std::remove_reference<D>::type&>::type deleter)
+        :ptr_(ptr), deleter_(deleter)
+    {
+
+    }
+
+    // ポインタと削除子への右辺値参照
+    unique_ptr(pointer ptr,
+            typename std::remove_reference<D>::type&& deleter)
+        :ptr_(ptr), deleter_(std::move(deleter))
+    {
+        static_assert(!std::is_reference<D>::value,
+            "unique_ptr constructed with reference to rvalue deleter");
+    }
+
+    // nullptr
+    unique_ptr(nullptr_t) :p_holder_(pointer()) { }
+
+    // ムーブコンストラクタ
+    unique_ptr(unique_ptr&& other)
+        :ptr_(other.release()), deleter_(std::forward<D>(other.get_deleter()))
+    {
+
+    }
+
+    // コピー構築禁止
+    unique_ptr(const unique_ptr&) = delete;
+
+    // デストラクタ
+    ~unique_ptr()
+    {
+        if (ptr_) {
+            deleter_(ptr_);
+        }
+    }
+
+    // ムーブ代入
+    unique_ptr& operator =(unique_ptr&& other)
+    {
+        assert(ptr_ != other.ptr_ || ptr_ == pointer());
+        reset(other.release());
+        deleter_ = std::forward<D>(other.get_deleter());
+        return *this;
+    }
+
+    // nullptr代入
+    unique_ptr& operator =(nullptr_t)
+    {
+        reset();
+        return *this;
+    }
+
+    // コピー代入禁止
+    unique_ptr& operator =(const unique_ptr&) = delete;
+
+    // 添え字演算子
+    typename std::add_reference<T>::type operator [](size_t i) const
+    {
+        return get()[i];
+    }
+
+    // リソース取得
+    pointer get() const { return ptr_; }
+
+    // リソースの所有権放棄
+    pointer release()
+    {
+        pointer pRet = ptr_;
+        ptr_ = pointer();
+        return pRet;
+    }
+
+    // 削除子への参照取得
+    deleter_type& get_deleter() { return deleter_; }
+    const deleter_type& get_deleter() const { return deleter_; }
+
+    // リセット
+    void reset(pointer p = pointer())
+    {
+        pointer pOld = ptr_;
+        ptr_ = p;
+        if (pOld) {
+            deleter_(pOld);
+        }
+    }
+
+    // スワップ
+    void swap(unique_ptr& other)
+    {
+        using std::swap;
+        swap(ptr_, other.ptr_);
+        swap(deleter_, other.deleter_);
+    }
+
+    // 有効なリソースを所有しているか
+    explicit operator bool() const
+    {
+        return get() != pointer();
+    }
+
+};  // class unique_ptr<T[], D>
 
 }   // namespace tork
 
