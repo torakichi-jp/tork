@@ -6,6 +6,7 @@
 #ifndef TORK_MEMORY_UNIQUE_PTR_INCLUDED
 #define TORK_MEMORY_UNIQUE_PTR_INCLUDED
 
+#include <ostream>
 #include "default_deleter.h"
 
 namespace tork {
@@ -314,6 +315,15 @@ public:
     }
 
 };  // class unique_ptr<T[], D>
+
+// ストリーム出力
+template<class charT, class Traits, class T, class D>
+std::basic_ostream<charT, Traits>& operator <<(
+        std::basic_ostream<charT, Traits>& os, const unique_ptr<T, D>& p)
+{
+    os << p.get();
+    return os;
+}
 
 }   // namespace tork
 

@@ -101,6 +101,7 @@
     <ClInclude Include="..\include\tork\memory.h" />
     <ClInclude Include="..\include\tork\memory\allocator.h" />
     <ClInclude Include="..\include\tork\memory\default_deleter.h" />
+    <ClInclude Include="..\include\tork\memory\enable_shared_from_this.h" />
     <ClInclude Include="..\include\tork\memory\ptr_holder.h" />
     <ClInclude Include="..\include\tork\memory\shared_ptr.h" />
     <ClInclude Include="..\include\tork\memory\unique_ptr.h" />
