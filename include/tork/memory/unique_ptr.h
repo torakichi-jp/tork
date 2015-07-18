@@ -325,6 +325,109 @@ std::basic_ostream<charT, Traits>& operator <<(
     return os;
 }
 
+// oeprator ==
+template<class T, class D, class U, class E>
+bool operator ==(const unique_ptr<T, D>& lhs, const unique_ptr<U, E>& rhs)
+{
+    return lhs.get() == rhs.get();
+}
+template<class T, class D>
+bool operator ==(const unique_ptr<T, D>& lhs, nullptr_t)
+{
+    return !lhs;
+}
+template<class T, class D>
+bool operator ==(nullptr_t, const unique_ptr<T, D>& rhs)
+{
+    return !rhs;
+}
+
+// oeprator !=
+template<class T, class D, class U, class E>
+bool operator !=(const unique_ptr<T, D>& lhs, const unique_ptr<U, E>& rhs)
+{
+    return lhs.get() != rhs.get();
+}
+template<class T, class D>
+bool operator !=(const unique_ptr<T, D>& lhs, nullptr_t)
+{
+    return static_cast<bool>(lhs);
+}
+template<class T, class D>
+bool operator !=(nullptr_t, const unique_ptr<T, D>& rhs)
+{
+    return static_cast<bool>(rhs);
+}
+
+// oeprator <
+template<class T, class D, class U, class E>
+bool operator <(const unique_ptr<T, D>& lhs, const unique_ptr<U, E>& rhs)
+{
+    return lhs.get() < rhs.get();
+}
+template<class T, class D>
+bool operator <(const unique_ptr<T, D>& lhs, nullptr_t)
+{
+    return lhs.get() < nullptr;
+}
+template<class T, class D>
+bool operator <(nullptr_t, const unique_ptr<T, D>& rhs)
+{
+    return nullptr < rhs.get();
+}
+
+// oeprator <=
+template<class T, class D, class U, class E>
+bool operator <=(const unique_ptr<T, D>& lhs, const unique_ptr<U, E>& rhs)
+{
+    return !(rhs < lhs);
+}
+template<class T, class D>
+bool operator <=(const unique_ptr<T, D>& lhs, nullptr_t)
+{
+    return !(nullptr < lhs);
+}
+template<class T, class D>
+bool operator <=(nullptr_t, const unique_ptr<T, D>& rhs)
+{
+    return !(rhs < nullptr);
+}
+
+// oeprator >
+template<class T, class D, class U, class E>
+bool operator >(const unique_ptr<T, D>& lhs, const unique_ptr<U, E>& rhs)
+{
+    return rhs < lhs;
+}
+template<class T, class D>
+bool operator >(const unique_ptr<T, D>& lhs, nullptr_t)
+{
+    return nullptr < lhs;
+}
+template<class T, class D>
+bool operator >(nullptr_t, const unique_ptr<T, D>& rhs)
+{
+    return rhs < nullptr;
+}
+
+// oeprator >=
+template<class T, class D, class U, class E>
+bool operator >=(const unique_ptr<T, D>& lhs, const unique_ptr<U, E>& rhs)
+{
+    return !(lhs < rhs);
+}
+template<class T, class D>
+bool operator >=(const unique_ptr<T, D>& lhs, nullptr_t)
+{
+    return !(lhs < nullptr);
+}
+template<class T, class D>
+bool operator >=(nullptr_t, const unique_ptr<T, D>& rhs)
+{
+    return !(nullptr < rhs);
+}
+
+
 }   // namespace tork
 
 #endif  // TORK_MEMORY_UNIQUE_PTR_INCLUDED

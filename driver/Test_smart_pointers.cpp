@@ -94,6 +94,18 @@ void Test_unique_ptr()
         if (i < num - 1) cout << ' ';
         else cout << endl;
     }
+
+    unique_ptr<int> a(new int(80));
+    unique_ptr<int> b(new int(160));
+    cout << std::boolalpha;
+    cout << (a == a) << ' ' << (a != b) << endl;
+    cout << (a != nullptr) << ' ' << (nullptr != a) << endl;
+    cout << (a < b) << ' ' << (a > b) << endl;
+    cout << (a <= b) << ' ' << (a >= b) << endl;
+    cout << (a < nullptr) << ' ' << (nullptr < a) << endl;
+    cout << (a > nullptr) << ' ' << (nullptr > a) << endl;
+    cout << (a <= nullptr) << ' ' << (nullptr <= a) << endl;
+    cout << (a >= nullptr) << ' ' << (nullptr >= a) << endl;
 }
 
 // weak_ptr テスト
