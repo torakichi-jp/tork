@@ -49,7 +49,7 @@ public:
 namespace impl {
 
     template<class T>
-    void do_enable_shared(
+    inline void do_enable_shared(
             enable_shared_from_this<T>* pEs,
             impl::ptr_holder_base* pHolder)
     {

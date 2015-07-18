@@ -86,12 +86,14 @@ void Test_unique_ptr()
     ud2.reset(dynamic_cast<D*>(ub2.release()));
     cout << *ud2->p << endl;
 
-    unique_ptr<int[]> uia(new int[20]);
-    for (int i = 0; i < 20; ++i) {
+    const int num = 20;
+    unique_ptr<int[]> uia(new int[num]);
+    for (int i = 0; i < num; ++i) {
         uia[i] = i;
-        cout << uia[i] << ' ';
+        cout << uia[i];
+        if (i < num - 1) cout << ' ';
+        else cout << endl;
     }
-    cout << endl;
 }
 
 // weak_ptr テスト

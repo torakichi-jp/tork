@@ -668,6 +668,7 @@ struct std::hash<tork::shared_ptr<T>> {
 
 };  // struct std::hash<shared_ptr<T>>
 
+#include "enable_shared_from_this.h"
 
 #endif  // TORK_MEMORY_SHARED_PTR_H_INCLUDED
 
