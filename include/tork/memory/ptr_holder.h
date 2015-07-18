@@ -11,6 +11,7 @@
 #include <typeinfo>
 #include <type_traits>
 #include <utility>
+#include <cassert>
 
 namespace tork {
 
@@ -18,7 +19,9 @@ namespace tork {
     template<class T>
     class enable_shared_from_this;
 
+
     namespace impl {
+
 
     // 前方宣言
     class ptr_holder_base;
@@ -27,6 +30,7 @@ namespace tork {
             enable_shared_from_this<T1>* pEs,
             impl::ptr_holder_base* pHolder);
     void do_enable_shared(const volatile void*, const volatile void*);
+
 
     //==========================================================================
     // ポインタホルダ基底クラス
