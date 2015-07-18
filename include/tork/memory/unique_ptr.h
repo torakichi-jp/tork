@@ -27,6 +27,7 @@ public:
     typedef T element_type;
     typedef D deleter_type;
 
+    // 戻り値型を decltype で取得
     typedef decltype(impl::deleter_has_pointer::check<T, D>(nullptr)) pointer;
 
 private:
@@ -129,6 +130,18 @@ public:
     // コピー代入禁止
     unique_ptr& operator =(const unique_ptr&) = delete;
 
+    // 間接参照演算子
+    typename std::add_reference<T>::type operator *() const
+    {
+        return *get();
+    }
+
+    // アロー演算子
+    pointer operator ->() const
+    {
+        return get();
+    }
+
     // リソース取得
     pointer get() const { return ptr_; }
 
@@ -152,6 +165,20 @@ public:
         if (pOld) {
             deleter_(pOld);
         }
+    }
+
+    // スワップ
+    void swap(unique_ptr& other)
+    {
+        using std::swap;
+        swap(ptr_, other.ptr_);
+        swap(deleter_, other.deleter_);
+    }
+
+    // 有効なリソースを所有しているか
+    explicit operator bool() const
+    {
+        return get() != pointer();
     }
 
 };  // class unique_ptr

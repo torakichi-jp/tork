@@ -56,15 +56,17 @@ void Test_unique_ptr()
     unique_ptr<int> ui2(std::move(ui));
     unique_ptr<int> ui3;
     ui3 = std::move(ui2);
-    cout << *ui3.get() << endl;
+    cout << *ui3 << endl;
 
     unique_ptr<D> ud(new D);
     unique_ptr<B> ub(std::move(ud));
     delete dynamic_cast<D*>(ub.release());
 
     unique_ptr<B> ub2;
-    unique_ptr<D> ud2;
+    unique_ptr<D> ud2(new D(987));
     ub2 = std::move(ud2);
+    ud2.reset(dynamic_cast<D*>(ub2.release()));
+    cout << *ud2->p << endl;
 }
 
 // weak_ptr テスト
