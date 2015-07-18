@@ -30,26 +30,38 @@ public:
     typedef decltype(impl::deleter_has_pointer::check<T, D>(nullptr)) pointer;
 
 private:
-    pointer ptr_ = nullptr;
+    pointer ptr_ = pointer();
     deleter_type deleter_;
 
 public:
 
     // デフォルトコンストラクタ
-    unique_ptr() : ptr_(nullptr) { }
+    unique_ptr() : ptr_(pointer()) { }
 
     // ポインタを受け取るコンストラクタ
     explicit unique_ptr(pointer ptr)
         :ptr_(ptr), deleter_(default_deleter<T>()) { }
 
-    // ポインタと削除子
-    unique_ptr(pointer ptr, const D& deleter)
-        :ptr_(ptr), deleter_(deleter) { }
-    unique_ptr(pointer ptr, D&& deleter)
-        :ptr_(ptr), deleter_(std::move(deleter)) { }
+    // ポインタと削除子への参照
+    unique_ptr(pointer ptr,
+            typename std::conditional<std::is_reference<D>::value, D,
+                const typename std::remove_reference<D>::type&>::type deleter)
+        :ptr_(ptr), deleter_(deleter)
+    {
+
+    }
+
+    // ポインタと削除子への右辺値参照
+    unique_ptr(pointer ptr,
+            typename std::remove_reference<D>::type&& deleter)
+        :ptr_(ptr), deleter_(std::move(deleter))
+    {
+        static_assert(!std::is_reference<D>::value,
+            "unique_ptr constructed with reference to rvalue deleter");
+    }
 
     // nullptr
-    unique_ptr(nullptr_t) :p_holder_(nullptr) { }
+    unique_ptr(nullptr_t) :p_holder_(pointer()) { }
 
     // ムーブコンストラクタ
     unique_ptr(unique_ptr&& other)
@@ -87,9 +99,9 @@ public:
     // ムーブ代入
     unique_ptr& operator =(unique_ptr&& other)
     {
-        assert(ptr_ != other.ptr_ || ptr_ == nullptr);
+        assert(ptr_ != other.ptr_ || ptr_ == pointer());
         reset(other.release());
-        deleter_ = std::move(other.deleter_);
+        deleter_ = std::forward<D>(other.get_deleter());
         return *this;
     }
 
@@ -101,7 +113,7 @@ public:
         void>::type>
     unique_ptr& operator =(unique_ptr<U, E>&& other)
     {
-        assert(ptr_ != other.get() || ptr_ == nullptr);
+        assert(ptr_ != other.get() || ptr_ == pointer());
         reset(other.release());
         deleter_ = std::forward<E>(other.get_deleter());
         return *this;
@@ -124,7 +136,7 @@ public:
     pointer release()
     {
         pointer pRet = ptr_;
-        ptr_ = nullptr;
+        ptr_ = pointer();
         return pRet;
     }
 
