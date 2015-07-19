@@ -7,6 +7,7 @@
 #define TORK_MEMORY_UNIQUE_PTR_INCLUDED
 
 #include <ostream>
+#include <type_traits>
 #include "default_deleter.h"
 
 namespace tork {
@@ -433,6 +434,32 @@ void swap(unique_ptr<T, D>& lhs, unique_ptr<T, D>& rhs)
 {
     lhs.swap(rhs);
 }
+
+// unique_ptr生成
+template<class T, class... Args>
+inline typename std::enable_if<
+        !std::is_array<T>::value,
+    unique_ptr<T>>::type make_unique(Args&&... args)
+{
+    return unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+// unique_ptr配列版生成
+template<class T>
+inline typename std::enable_if<
+        std::is_array<T>::value &&
+        std::extent<T>::value == 0,
+    unique_ptr<T>>::type make_unique(size_t s)
+{
+    typedef typename std::remove_extent<T>::type Elem;
+    return unique_ptr<T>(new Elem[s]());
+}
+
+// 配列型のオーバロード禁止
+template<class T, class... Args>
+typename std::enable_if<
+        std::extent<T>::value != 0,
+    void>::type make_unique(Args&&...) = delete;
 
 
 }   // namespace tork

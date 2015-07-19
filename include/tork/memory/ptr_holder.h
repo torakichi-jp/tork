@@ -116,9 +116,9 @@ namespace tork {
         // 削除子取得
         void* get_deleter(const type_info& tid) const override
         {
-            return (tid == typeid(Deleter))
-                ? const_cast<void*>(static_cast<const void*>(&deleter_)) :
-                  nullptr;
+            return (tid == typeid(Deleter)) ?
+                const_cast<void*>(static_cast<const void*>(&deleter_)) :
+                nullptr;
         }
 
         // ホルダ作成
@@ -153,7 +153,10 @@ namespace tork {
 
             Traits::construct(a, p, ptr, deleter, alloc);
             p->add_ref();
+
+            // enable_shared_from_this 対応
             impl::do_enable_shared(ptr, p);
+
             return p;
         }
 
@@ -228,7 +231,10 @@ namespace tork {
             T* pRes = ::new(&p->storage_) T(std::forward<Args>(args)...);
 
             p->add_ref();
+
+            // enable_shared_from_this 対応
             impl::do_enable_shared(pRes, p);
+
             return p;
         }
 

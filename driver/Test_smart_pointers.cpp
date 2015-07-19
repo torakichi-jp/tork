@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <cassert>
+#include <algorithm>
 
 #include <tork/memory.h>
 #include <tork/debug.h>
@@ -106,6 +107,21 @@ void Test_unique_ptr()
     cout << (a > nullptr) << ' ' << (nullptr > a) << endl;
     cout << (a <= nullptr) << ' ' << (nullptr <= a) << endl;
     cout << (a >= nullptr) << ' ' << (nullptr >= a) << endl;
+
+    // make_unique() テスト
+    {
+        auto ip = tork::make_unique<int>(456); // 通常版
+        cout << *ip << endl;
+
+        const int N = 10;
+        auto ap = tork::make_unique<int[]>(N); // 配列版
+        auto b = &ap[0]; // begin
+        auto e = &ap[N]; // end
+        int i = 0;
+        std::for_each(b, e, [&i](int &n) { n = i++; });
+        std::for_each(b, e, [](int n) { cout << n << ' '; });
+        cout << endl;
+    }
 }
 
 // weak_ptr テスト
