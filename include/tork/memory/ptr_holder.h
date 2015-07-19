@@ -197,7 +197,10 @@ namespace tork {
 
     public:
 
-        void destroy() override { reinterpret_cast<T*>(&storage_)->~T(); }
+        void destroy() override {
+            void* p = &storage_;
+            static_cast<T*>(p)->~T();
+        }
 
         // ホルダ作成
         template<class... Args>
