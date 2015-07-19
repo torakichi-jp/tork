@@ -464,5 +464,24 @@ typename std::enable_if<
 
 }   // namespace tork
 
+
+// ハッシュの前方宣言
+template<class T> struct std::hash;
+
+// ハッシュの unique_ptr の特殊化
+template<class T>
+struct std::hash<tork::unique_ptr<T>> {
+
+    typedef size_t result_type;
+    typedef tork::unique_ptr<T> argument_type;
+
+    // ハッシュ関数
+    result_type operator ()(const argument_type& keyval)
+    {
+        return std::hash<T*>()(keyval.get());
+    }
+
+};  // struct std::hash<unique_ptr<T>>
+
 #endif  // TORK_MEMORY_UNIQUE_PTR_INCLUDED
 
