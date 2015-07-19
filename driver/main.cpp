@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <tork/debug.h>
+#include <tork/define.h>
 
 // メモリリーク検出
 DebugDetectMemoryLeak(global_memory_leak_detection);
@@ -27,7 +28,7 @@ int main()
     /*
     Test_OptionStream();
     Test_optional();
-    */
+
     Test_default_deleter();
 
     Test_shared_ptr();
@@ -35,6 +36,7 @@ int main()
     Test_unique_ptr();
 
     Test_enable_shared_from_this();
+    */
 
     stopper();
     return 0;

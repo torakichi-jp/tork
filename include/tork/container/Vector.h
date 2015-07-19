@@ -8,6 +8,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include "../memory/allocator.h"
 
 namespace tork {
 
@@ -17,21 +18,22 @@ namespace tork {
         OutOfRangeError(int i): std::out_of_range("Range Error"), index(i) { }
     };
 
-    template<class T>
-    class Vector : public std::vector<T> {
+    template<class T, class Allocator = std::allocator<T>>
+    class Vector : public std::vector<T, Allocator> {
     public:
-        typedef typename std::vector<T>::size_type size_type;
+        typedef std::vector<T, Allocator> base_type;
+        typedef typename base_type::size_type size_type;
 
         Vector() { }
-        explicit Vector(size_type n) : std::vector<T>(n) { }
-        Vector(size_type n, const T& v) : std::vector<T>(n, v) { }
+        explicit Vector(size_type n) : base_type(n) { }
+        Vector(size_type n, const T& v) : base_type(n, v) { }
 
         T& operator[] (size_type i)
         {
             if (i < 0 || this->size() <= i) {
                 throw OutOfRangeError(i);
             }
-            return std::vector<T>::operator[](i);
+            return base_type::operator[](i);
         }
 
         const T& operator[] (size_type i) const
@@ -39,7 +41,7 @@ namespace tork {
             if (i < 0 || this->size() <= i) {
                 throw OutOfRangeError(i);
             }
-            return std::vector<T>::operator[](i);
+            return base_type::operator[](i);
         }
     };
 
