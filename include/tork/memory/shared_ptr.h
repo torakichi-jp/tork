@@ -14,7 +14,6 @@
 #include <utility>
 #include "default_deleter.h"
 #include "allocator.h"
-#include "../define.h"
 
 #include "ptr_holder.h"
 

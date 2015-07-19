@@ -197,7 +197,7 @@ namespace tork {
 
     public:
 
-        void destroy() override { pointer_cast<T*>(&storage_)->~T(); }
+        void destroy() override { reinterpret_cast<T*>(&storage_)->~T(); }
 
         // ホルダ作成
         template<class... Args>

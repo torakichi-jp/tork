@@ -427,6 +427,13 @@ bool operator >=(nullptr_t, const unique_ptr<T, D>& rhs)
     return !(nullptr < rhs);
 }
 
+// スワップ
+template <class T, class D>
+void swap(unique_ptr<T, D>& lhs, unique_ptr<T, D>& rhs)
+{
+    lhs.swap(rhs);
+}
+
 
 }   // namespace tork
 
