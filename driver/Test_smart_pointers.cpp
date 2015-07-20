@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <cassert>
 #include <algorithm>
+#include <memory>
 
 #include <tork/memory.h>
 #include <tork/debug.h>
@@ -43,6 +44,24 @@ struct D : public B {
         other.p = nullptr;
     }
 };
+
+template<class Ptr>
+void Show_pointer_traits()
+{
+    cout << "*** std::pointer_traits<" << typeid(Ptr).name() << "> ***" << endl;
+    using traits = std::pointer_traits<Ptr>;
+    cout << "pointer         " << typeid(traits::pointer).name() << endl;
+    cout << "element_type    " << typeid(traits::element_type).name() << endl;
+    cout << "difference_type " << typeid(traits::difference_type).name() << endl;
+    cout << "rebind<float>   " << typeid(traits::rebind<float>).name() << endl;
+}
+
+void Test_pointer_traits()
+{
+    Show_pointer_traits<tork::shared_ptr<int>>();
+    Show_pointer_traits<tork::weak_ptr<size_t>>();
+    Show_pointer_traits<tork::unique_ptr<double[]>>();
+}
 
 // enable_shared_from_this テスト
 void Test_enable_shared_from_this()

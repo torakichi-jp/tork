@@ -1,6 +1,5 @@
 ﻿#include <iostream>
 #include <tork/debug.h>
-#include <tork/define.h>
 
 // メモリリーク検出
 DebugDetectMemoryLeak(global_memory_leak_detection);
@@ -19,7 +18,8 @@ void Test_default_deleter(); // default_deleter テスト
 void Test_shared_ptr();      // shared_ptr テスト
 void Test_weak_ptr();        // weak_ptr テスト
 void Test_unique_ptr();      // unique_ptr テスト
-void Test_enable_shared_from_this();
+void Test_enable_shared_from_this(); // enabld_shared_from_this テスト
+void Test_pointer_traits();  // std::pointer_traits<shared_ptr<T>> など
 
 
 // エントリポイント
@@ -37,6 +37,7 @@ int main()
 
     Test_enable_shared_from_this();
     */
+    Test_pointer_traits();
 
     stopper();
     return 0;
