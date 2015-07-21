@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <tork/debug.h>
+#include <codecvt>
 
 // メモリリーク検出
 DebugDetectMemoryLeak(global_memory_leak_detection);
@@ -22,11 +23,13 @@ void Test_weak_ptr();        // weak_ptr テスト
 void Test_unique_ptr();      // unique_ptr テスト
 void Test_enable_shared_from_this(); // enabld_shared_from_this テスト
 void Test_pointer_traits();  // std::pointer_traits<shared_ptr<T>> など
+void Test_wstring_convert(); // std::wstring_convert テスト
 
 
 // エントリポイント
 int main()
 {
+    Test_wstring_convert();
     /*
     Test_OptionStream();
     Test_optional();
