@@ -92,6 +92,7 @@
     <ClCompile Include="Test_optional.cpp" />
     <ClCompile Include="Test_OptionStream.cpp" />
     <ClCompile Include="Test_smart_pointers.cpp" />
+    <ClCompile Include="Test_text.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,6 +4,7 @@
 #include "tork/define.h"
 #include "tork/debug.h"
 #include "tork/optional.h"
+#include "tork/text.h"
 
 #include "tork/container.h"
 #include "tork/app.h"

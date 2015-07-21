@@ -14,6 +14,8 @@ void stopper()
 
 void Test_OptionStream();    // OptionStream テスト
 void Test_optional();        // optional テスト
+void Test_text();            // text.h テスト
+
 void Test_default_deleter(); // default_deleter テスト
 void Test_shared_ptr();      // shared_ptr テスト
 void Test_weak_ptr();        // weak_ptr テスト
@@ -28,7 +30,7 @@ int main()
     /*
     Test_OptionStream();
     Test_optional();
-
+    Test_pointer_traits();
     Test_default_deleter();
 
     Test_shared_ptr();
@@ -37,8 +39,7 @@ int main()
 
     Test_enable_shared_from_this();
     */
-    Test_pointer_traits();
-
+    Test_text();
     stopper();
     return 0;
 }
