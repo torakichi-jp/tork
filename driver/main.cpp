@@ -16,6 +16,7 @@ void stopper()
 void Test_OptionStream();    // OptionStream テスト
 void Test_optional();        // optional テスト
 void Test_text();            // text.h テスト
+void Test_wstring_convert(); // std::wstring_convert テスト
 
 void Test_default_deleter(); // default_deleter テスト
 void Test_shared_ptr();      // shared_ptr テスト
@@ -23,16 +24,17 @@ void Test_weak_ptr();        // weak_ptr テスト
 void Test_unique_ptr();      // unique_ptr テスト
 void Test_enable_shared_from_this(); // enabld_shared_from_this テスト
 void Test_pointer_traits();  // std::pointer_traits<shared_ptr<T>> など
-void Test_wstring_convert(); // std::wstring_convert テスト
 
 
 // エントリポイント
 int main()
 {
-    Test_wstring_convert();
     /*
+    Test_wstring_convert();
+
     Test_OptionStream();
     Test_optional();
+
     Test_pointer_traits();
     Test_default_deleter();
 

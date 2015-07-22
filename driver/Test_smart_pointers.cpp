@@ -48,8 +48,9 @@ struct D : public B {
 template<class Ptr>
 void Show_pointer_traits()
 {
-    cout << "*** std::pointer_traits<" << typeid(Ptr).name() << "> ***" << endl;
     using traits = std::pointer_traits<Ptr>;
+    cout << "*** " << typeid(traits).name() << " ***" << endl;
+
     cout << "pointer         " << typeid(traits::pointer).name() << endl;
     cout << "element_type    " << typeid(traits::element_type).name() << endl;
     cout << "difference_type " << typeid(traits::difference_type).name() << endl;

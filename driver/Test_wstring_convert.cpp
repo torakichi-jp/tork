@@ -28,5 +28,3 @@ void Test_wstring_convert()
     size_t s = u8strlen(str);
     std::cout << s << std::endl;
 }
-
-
