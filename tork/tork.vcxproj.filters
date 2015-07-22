@@ -98,5 +98,8 @@
     <ClCompile Include="..\src\app\OptionStream.cpp">
       <Filter>ソース ファイル\app</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\text.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

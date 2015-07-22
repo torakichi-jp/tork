@@ -62,6 +62,11 @@ Target lexical_cast(Source arg)
     return result;
 }
 
+// ワイド文字変換
+std::wstring ToWide(const std::string& str);
+std::wstring ToWide(const char* str);
+std::string FromWide(const std::wstring& wstr);
+std::string FromWide(const wchar_t* wstr);
 
 }   // namespace tork
 

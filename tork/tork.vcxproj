@@ -114,6 +114,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\app\OptionStream.cpp" />
     <ClCompile Include="..\src\debug.cpp" />
+    <ClCompile Include="..\src\text.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
