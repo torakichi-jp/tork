@@ -53,9 +53,19 @@ public:
     typedef impl::ArrayBase<T, Allocator> Base;
 
     typedef typename Base::size_type size_type;
+    typedef ptrdiff_t difference_type;
+    typedef T value_type;
+    typedef T& reference;
+    typedef const T& const_reference;
+
     typedef typename Base::allocator_type allocator_type;
 
     typedef std::allocator_traits<allocator_type> AllocTraits;
+    typedef typename AllocTraits::pointer pointer;
+    typedef typename AllocTraits::const_pointer const_pointer;
+
+    typedef T* iterator;
+    typedef const T* const_iterator;
 
 private:
     Base* p_base_ = nullptr;
@@ -116,10 +126,33 @@ public:
         return p_base_ ? p_base_->size_ : 0;
     }
 
+    T* data() const
+    {
+        return p_base_ ? p_base_->data_ : nullptr;
+    }
+
+    iterator begin()
+    {
+        return p_base_ ? data() : nullptr;
+    }
+    const_iterator begin() const
+    {
+        return p_base_ ? data() : nullptr;
+    }
+
+    iterator end()
+    {
+        return p_base_ ? data() + size() : nullptr;
+    }
+    const_iterator end() const
+    {
+        return p_base_ ? data() + size() : nullptr;
+    }
+
 private:
 
     // 配列ベース作成
-    Base* create_base(size_type s, allocator_type& alloc)
+    static Base* create_base(size_type s, allocator_type& alloc)
     {
         using traits = AllocTraits::rebind_traits<Base>;
         AllocTraits::rebind_alloc<Base> a = alloc;
@@ -135,7 +168,7 @@ private:
     }
 
     // 配列ベース破棄
-    void destroy_base(Base* p)
+    static void destroy_base(Base* p)
     {
         if (p) {
             for (size_type i = 0; i < p->size_; ++i) {

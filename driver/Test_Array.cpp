@@ -1,5 +1,7 @@
 ﻿
 #include <tork/container/Array.h>
+#include <algorithm>
+#include <vector>
 
 void Test_Array()
 {
