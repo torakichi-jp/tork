@@ -8,6 +8,7 @@
 #define TORK_ARRAY_H_INCLUDED
 
 #include <memory>
+#include "../memory/allocator.h"
 
 namespace tork {
 
@@ -26,7 +27,7 @@ struct ArrayBase {
     allocator_type alloc_;
 
 
-    ArrayBase(const allocator_type& a, size_type n)
+    ArrayBase(allocator_type& a, size_type n)
         :alloc_(a), data_(alloc_traits::allocate(a, n)),
         size_(0), capacity_(n)
     {
@@ -46,7 +47,7 @@ struct ArrayBase {
 //==============================================================================
 // 配列クラス
 //==============================================================================
-template<class T, class Allocator = std::allocator<T>>
+template<class T, class Allocator = tork::allocator<T>>
 class Array {
 public:
     typedef impl::ArrayBase<T, Allocator> Base;
@@ -65,49 +66,87 @@ public:
 
     ~Array()
     {
-        if (p_base_) {
-            for (size_type i = 0; i < p_base_->size_; ++i) {
-                AllocTraits::destroy(p_base_->alloc_, &p_base_->data_[i]);
+        destroy_base(p_base_);
+    }
+
+    // 容量の予約
+    void reserve(size_type s)
+    {
+        if (p_base_ == nullptr) {
+            // 空だったらベースを作る
+            p_base_ = create_base(s, allocator_type());
+            return;
+        }
+        else if (s <= capacity()) {
+            // 指定された容量が現在の容量よりも小さければ
+            // 何もしない
+            return;
+        }
+
+        Base* p = create_base(s, p_base_->alloc_);
+        if (p == nullptr || p->data_ == nullptr) return;
+        try {
+            // 要素のムーブ
+            for (size_type i = 0; i < size(); ++i) {
+                AllocTraits::construct(
+                        p->alloc_, &p->data_[i], std::move(p_base_->data_[i]));
             }
+            p->size_ = size();
 
-            using traits = AllocTraits::rebind_traits<Base>;
-            AllocTraits::rebind_alloc<Base> a = p_base_->alloc_;
+            // 古い要素の削除
+            destroy_base(p_base_);
 
-            traits::destroy(a, p_base_);
-            traits::deallocate(a, p_base_, sizeof(Base));
+            p_base_ = p;
+        }
+        catch (...) {
+            destroy_base(p);
+            throw;
         }
     }
 
-    void reserve(size_type s)
+    // 容量
+    size_type capacity() const
     {
-        if (p_base_ && s <= p_base_->capacity_) return;
+        return p_base_ ? p_base_->capacity_ : 0;
+    }
 
+    // 要素数
+    size_type size() const
+    {
+        return p_base_ ? p_base_->size_ : 0;
+    }
+
+private:
+
+    // 配列ベース作成
+    Base* create_base(size_type s, allocator_type& alloc)
+    {
         using traits = AllocTraits::rebind_traits<Base>;
-        AllocTraits::rebind_alloc<Base> a = p_base_->alloc_;
-
+        AllocTraits::rebind_alloc<Base> a = alloc;
         Base* p = traits::allocate(a, sizeof(Base));
-        if (p == nullptr) return;
-
         try {
-            traits::construct(a, p, p_base_->alloc_, s);
-            if (p->data_ == nullptr) return;
-
-            if (p_base_) {
-                T* pData = p_base_->data_;
-                size_type sz = p_base_->size_;
-
-                std::uninitialized_copy(pData, &pData[sz], p->data_);
-
-                for (size_type i = 0; i < sz; ++i) {
-                    AllocTraits::destroy(p_base_->alloc_, &pData[i]);
-                }
-                p->size_ = sz;
-            }
-            p_base_ = p;
+            traits::construct(a, p, alloc, s);
         }
         catch (...) {
             traits::deallocate(a, p, sizeof(Base));
             throw;
+        }
+        return p;
+    }
+
+    // 配列ベース破棄
+    void destroy_base(Base* p)
+    {
+        if (p) {
+            for (size_type i = 0; i < p->size_; ++i) {
+                AllocTraits::destroy(p->alloc_, &p->data_[i]);
+            }
+
+            using traits = AllocTraits::rebind_traits<Base>;
+            AllocTraits::rebind_alloc<Base> a = p->alloc_;
+
+            traits::destroy(a, p);
+            traits::deallocate(a, p, sizeof(Base));
         }
     }
 
