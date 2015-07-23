@@ -1,6 +1,5 @@
 ﻿#include <iostream>
 #include <tork/debug.h>
-#include <codecvt>
 
 // メモリリーク検出
 DebugDetectMemoryLeak(global_memory_leak_detection);
@@ -8,7 +7,7 @@ DebugDetectMemoryLeak(global_memory_leak_detection);
 // ストッパー
 void stopper()
 {
-    std::cout << "enter to continue." << std::flush;
+    std::cout << "press enter to continue." << std::flush;
     std::cin.clear();
     std::cin.get();
 }
@@ -29,9 +28,8 @@ void Test_pointer_traits();  // std::pointer_traits<shared_ptr<T>> など
 // エントリポイント
 int main()
 {
-    /*
     Test_wstring_convert();
-
+    /*
     Test_OptionStream();
     Test_optional();
 
@@ -43,8 +41,9 @@ int main()
     Test_unique_ptr();
 
     Test_enable_shared_from_this();
-    */
+
     Test_text();
+    */
     stopper();
     return 0;
 }
