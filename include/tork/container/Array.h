@@ -72,11 +72,44 @@ private:
 
 public:
 
+    // デフォルトコンストラクタ
     Array() { }
 
+    // デストラクタ
     ~Array()
     {
         destroy_base(p_base_);
+    }
+
+private:
+    // 容量を拡張する
+    void expand_capacity(size_type first_size = 8)
+    {
+        if (capacity() == 0) {
+            reserve(first_size);
+        }
+        else if (size() == capacity()) {
+            reserve(capacity() * 2);
+        }
+    }
+
+public:
+    // 後ろに追加
+    void push_back(const T& value)
+    {
+        expand_capacity();
+        AllocTraits::construct(
+                p_base_->alloc_, &data()[size()], value);
+        p_base_->size_++;
+    }
+
+    // 後ろに追加（ムーブ構築）
+    void push_back(T&& value)
+    {
+        expand_capacity();
+        AllocTraits::construct(
+                p_base_->alloc_, &data()[size()], std::move(value));
+        p_base_->size_++;
     }
 
     // 容量の予約
@@ -126,11 +159,13 @@ public:
         return p_base_ ? p_base_->size_ : 0;
     }
 
+    // データの先頭を指すポインタ
     T* data() const
     {
         return p_base_ ? p_base_->data_ : nullptr;
     }
 
+    // 最初の要素を指すイテレータ
     iterator begin()
     {
         return p_base_ ? data() : nullptr;
@@ -140,6 +175,7 @@ public:
         return p_base_ ? data() : nullptr;
     }
 
+    // 最後の要素の次を指すイテレータ
     iterator end()
     {
         return p_base_ ? data() + size() : nullptr;
