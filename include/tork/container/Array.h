@@ -52,6 +52,7 @@ template<class T, class Allocator = tork::allocator<T>>
 class Array {
 public:
     typedef impl::ArrayBase<T, Allocator> Base;
+    typedef Array<T, Allocator> ThisType;
 
     typedef typename Base::size_type size_type;
     typedef ptrdiff_t difference_type;
@@ -193,6 +194,26 @@ public:
     const_reverse_iterator rend() const
     {
         return const_reverse_iterator(begin());
+    }
+
+    // constイテレータ
+    const_iterator cbegin() const
+    {
+        return static_cast<const ThisType*>(this)->begin();
+    }
+    const_iterator cend() const
+    {
+        return static_cast<const ThisType*>(this)->end();
+    }
+
+    // const逆イテレータ
+    const_reverse_iterator crbegin() const
+    {
+        return static_cast<const ThisType*>(this)->rbegin();
+    }
+    const_reverse_iterator crend() const
+    {
+        return static_cast<const ThisType*>(this)->rend();
     }
 
 private:
