@@ -1,8 +1,12 @@
 ﻿#include <iostream>
 
 #include <tork/container/Array.h>
+#include <tork/memory/shared_ptr.h>
 #include <algorithm>
 #include <vector>
+
+using std::cout;
+using std::endl;
 
 void Test_Array()
 {
@@ -15,13 +19,18 @@ void Test_Array()
 
 	// 全要素出力
 	for (auto i : a) {
-		std::cout << i << ' ';
+		cout << i << ' ';
 	}
-	std::cout << std::endl;
+	cout << endl;
 
 	// 逆イテレータ
 	for (auto rit = a.rbegin(); rit != a.rend(); ++rit) {
-		std::cout << *rit << ' ';
+		cout << *rit << ' ';
 	}
-	std::cout << std::endl;
+	cout << endl;
+
+	using SpInt = tork::shared_ptr<int>;
+	Array<SpInt> sa;
+	sa.push_back(SpInt::make(20));
+	cout << **sa.cbegin() << endl;
 }
