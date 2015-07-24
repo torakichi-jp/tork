@@ -103,6 +103,16 @@ public:
         p_base_->size_++;
     }
 
+    // 末尾に構築
+    template<class... Args>
+    void emplace_back(Args&&... args)
+    {
+        expand_capacity();
+        AllocTraits::construct(
+                p_base_->alloc_, &data()[size()], std::forward<Args>(args)...);
+        p_base_->size_++;
+    }
+
     // 容量の予約
     void reserve(size_type s)
     {

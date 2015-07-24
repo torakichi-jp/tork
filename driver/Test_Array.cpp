@@ -39,6 +39,9 @@ void Test_Array_shared_ptr()
 	Array<SpInt> sa;
 	sa.push_back(SpInt::make(20));
 	cout << **sa.cbegin() << endl;
+
+	sa.emplace_back(new int(50));
+	cout << *sa.back() << endl;
 }
 
 void Test_Array()
