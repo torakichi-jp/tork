@@ -91,7 +91,7 @@ public:
         expand_capacity();
         AllocTraits::construct(
                 p_base_->alloc_, &data()[size()], value);
-        p_base_->size_++;
+        ++p_base_->size_;
     }
 
     // 末尾に追加（ムーブ構築）
@@ -100,7 +100,7 @@ public:
         expand_capacity();
         AllocTraits::construct(
                 p_base_->alloc_, &data()[size()], std::move(value));
-        p_base_->size_++;
+        ++p_base_->size_;
     }
 
     // 末尾に構築
@@ -110,7 +110,14 @@ public:
         expand_capacity();
         AllocTraits::construct(
                 p_base_->alloc_, &data()[size()], std::forward<Args>(args)...);
-        p_base_->size_++;
+        ++p_base_->size_;
+    }
+
+    // 末尾から削除
+    void pop_back()
+    {
+        AllocTraits::destroy(p_base_->alloc_, &data()[size() - 1]);
+        --p_base_->size_;
     }
 
     // 容量の予約
