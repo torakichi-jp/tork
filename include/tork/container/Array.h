@@ -85,7 +85,7 @@ public:
         destroy_base(p_base_);
     }
 
-    // 後ろに追加
+    // 末尾に追加
     void push_back(const T& value)
     {
         expand_capacity();
@@ -94,7 +94,7 @@ public:
         p_base_->size_++;
     }
 
-    // 後ろに追加（ムーブ構築）
+    // 末尾に追加（ムーブ構築）
     void push_back(T&& value)
     {
         expand_capacity();
@@ -139,80 +139,54 @@ public:
     }
 
     // 容量
-    size_type capacity() const
-    {
-        return p_base_ ? p_base_->capacity_ : 0;
-    }
+    size_type capacity() const { return p_base_ ? p_base_->capacity_ : 0; }
 
     // 要素数
-    size_type size() const
-    {
-        return p_base_ ? p_base_->size_ : 0;
-    }
+    size_type size() const { return p_base_ ? p_base_->size_ : 0; }
+
+    // 空かどうか
+    bool empty() const { return size() == 0; }
 
     // データの先頭を指すポインタ
-    T* data() const
-    {
-        return p_base_ ? p_base_->data_ : nullptr;
-    }
+    T* data() const { return p_base_ ? p_base_->data_ : nullptr; }
+
+    // 先頭要素の参照
+    reference front() { return *data(); }
+    const_reference front() const { return *data(); }
+
+    // 末尾要素の参照
+    reference back() { return data()[size() - 1]; }
+    const_reference back() const { return data()[size() - 1]; }
 
     // 最初の要素を指すイテレータ
-    iterator begin()
-    {
-        return p_base_ ? data() : nullptr;
-    }
-    const_iterator begin() const
-    {
-        return p_base_ ? data() : nullptr;
-    }
+    iterator begin() { return p_base_ ? data() : nullptr; }
+    const_iterator begin() const { return p_base_ ? data() : nullptr; }
 
     // 最後の要素の次を指すイテレータ
-    iterator end()
-    {
-        return p_base_ ? data() + size() : nullptr;
-    }
-    const_iterator end() const
-    {
-        return p_base_ ? data() + size() : nullptr;
-    }
+    iterator end() { return p_base_ ? data() + size() : nullptr; }
+    const_iterator end() const { return p_base_ ? data() + size() : nullptr; }
 
     // 最後の要素を指す逆イテレータ
-    reverse_iterator rbegin()
-    {
-        return reverse_iterator(end());
-    }
-    const_reverse_iterator rbegin() const
-    {
-        return const_reverse_iterator(end());
-    }
+    reverse_iterator rbegin() { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
 
     // 最初の要素の前を指す逆イテレータ
-    reverse_iterator rend()
-    {
-        return reverse_iterator(begin());
-    }
-    const_reverse_iterator rend() const
-    {
-        return const_reverse_iterator(begin());
-    }
+    reverse_iterator rend() { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
     // constイテレータ
-    const_iterator cbegin() const
-    {
+    const_iterator cbegin() const {
         return static_cast<const ThisType*>(this)->begin();
     }
-    const_iterator cend() const
-    {
+    const_iterator cend() const {
         return static_cast<const ThisType*>(this)->end();
     }
 
     // const逆イテレータ
-    const_reverse_iterator crbegin() const
-    {
+    const_reverse_iterator crbegin() const {
         return static_cast<const ThisType*>(this)->rbegin();
     }
-    const_reverse_iterator crend() const
-    {
+    const_reverse_iterator crend() const {
         return static_cast<const ThisType*>(this)->rend();
     }
 

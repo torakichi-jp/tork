@@ -7,12 +7,13 @@
 
 using std::cout;
 using std::endl;
+using tork::Array;
 
-void Test_Array()
+void Test_Array_int()
 {
-    using tork::Array;
+	cout << "*** test Array<int> ***" << endl;
 
-    Array<int> a;
+	Array<int> a;
 	for (int i = 0; i < 10; ++i) {
 		a.push_back(i);
 	}
@@ -28,9 +29,20 @@ void Test_Array()
 		cout << *rit << ' ';
 	}
 	cout << endl;
+}
+
+void Test_Array_shared_ptr()
+{
+	cout << "*** test Array<shared_ptr<int>> ***" << endl;
 
 	using SpInt = tork::shared_ptr<int>;
 	Array<SpInt> sa;
 	sa.push_back(SpInt::make(20));
 	cout << **sa.cbegin() << endl;
+}
+
+void Test_Array()
+{
+	Test_Array_int();
+	Test_Array_shared_ptr();
 }
