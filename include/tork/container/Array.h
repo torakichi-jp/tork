@@ -8,6 +8,7 @@
 #define TORK_ARRAY_H_INCLUDED
 
 #include <memory>
+#include <iterator>
 #include "../memory/allocator.h"
 
 namespace tork {
@@ -66,6 +67,8 @@ public:
 
     typedef T* iterator;
     typedef const T* const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
 private:
     Base* p_base_ = nullptr;
@@ -81,19 +84,6 @@ public:
         destroy_base(p_base_);
     }
 
-private:
-    // 容量を拡張する
-    void expand_capacity(size_type first_size = 8)
-    {
-        if (capacity() == 0) {
-            reserve(first_size);
-        }
-        else if (size() == capacity()) {
-            reserve(capacity() * 2);
-        }
-    }
-
-public:
     // 後ろに追加
     void push_back(const T& value)
     {
@@ -185,7 +175,38 @@ public:
         return p_base_ ? data() + size() : nullptr;
     }
 
+    // 最後の要素を指す逆イテレータ
+    reverse_iterator rbegin()
+    {
+        return reverse_iterator(end());
+    }
+    const_reverse_iterator rbegin() const
+    {
+        return const_reverse_iterator(end());
+    }
+
+    // 最初の要素の前を指す逆イテレータ
+    reverse_iterator rend()
+    {
+        return reverse_iterator(begin());
+    }
+    const_reverse_iterator rend() const
+    {
+        return const_reverse_iterator(begin());
+    }
+
 private:
+
+    // 容量を拡張する
+    void expand_capacity(size_type first_size = 8)
+    {
+        if (capacity() == 0) {
+            reserve(first_size);
+        }
+        else if (size() == capacity()) {
+            reserve(capacity() * 2);
+        }
+    }
 
     // 配列ベース作成
     static Base* create_base(size_type s, allocator_type& alloc)
