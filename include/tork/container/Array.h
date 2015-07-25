@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <iterator>
+#include <cassert>
 #include "../memory/allocator.h"
 
 namespace tork {
@@ -116,8 +117,43 @@ public:
     // 末尾から削除
     void pop_back()
     {
+        assert(!empty());
         AllocTraits::destroy(p_base_->alloc_, &data()[size() - 1]);
         --p_base_->size_;
+    }
+
+    // サイズ変更
+    void resize(size_type sz)
+    {
+        if (sz < size()) {
+            for (size_type i = 0; i < size() - sz; ++i) {
+                pop_back();
+            }
+        }
+        else if (sz > size()) {
+            reserve(sz);
+            for (size_type i = 0; i < sz - size(); ++i) {
+                AllocTraits::construct(
+                        p_base_->alloc_, &data()[size() + i], std::move(T()));
+            }
+            p_base_->size_ = sz;
+        }
+    }
+    void resize(size_type sz, const T& value)
+    {
+        if (sz < size()) {
+            for (size_type i = 0; i < size() - sz; ++i) {
+                pop_back();
+            }
+        }
+        else if (sz > size()) {
+            reserve(sz);
+            for (size_type i = 0; i < sz - size(); ++i) {
+                AllocTraits::construct(
+                        p_base_->alloc_, &data()[size() + i], value);
+            }
+            p_base_->size_ = sz;
+        }
     }
 
     // 容量の予約
