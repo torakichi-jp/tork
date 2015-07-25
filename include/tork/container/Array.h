@@ -197,6 +197,11 @@ public:
     // 要素数
     size_type size() const { return p_base_ ? p_base_->size_ : 0; }
 
+    // 格納できる最大数
+    size_type max_size() const {
+        return AllocTraits::max_size(p_base_ ? p_base_->alloc_ : allocator_type());
+    }
+
     // 空かどうか
     bool empty() const { return size() == 0; }
 
