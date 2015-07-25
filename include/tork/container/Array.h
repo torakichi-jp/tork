@@ -156,6 +156,17 @@ public:
         }
     }
 
+    // 要素のクリア
+    void clear()
+    {
+        if (p_base_ == nullptr) return;
+
+        for (size_type i = 0; i < size(); ++i) {
+            AllocTraits::destroy(p_base_->alloc_, &data()[i]);
+        }
+        p_base_->size_ = 0;
+    }
+
     // 容量の予約
     void reserve(size_type s)
     {
@@ -198,8 +209,11 @@ public:
     size_type size() const { return p_base_ ? p_base_->size_ : 0; }
 
     // 格納できる最大数
-    size_type max_size() const {
-        return AllocTraits::max_size(p_base_ ? p_base_->alloc_ : allocator_type());
+    size_type max_size() const { return AllocTraits::max_size(get_allocator()); }
+
+    // アロケータ
+    allocator_type get_allocator() const {
+        return p_base_ ? p_base_->alloc_ : allocator_type();
     }
 
     // 空かどうか

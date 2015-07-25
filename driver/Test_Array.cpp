@@ -29,6 +29,8 @@ void Test_Array_int()
 		cout << *rit << ' ';
 	}
 	cout << endl;
+
+	a.clear();
 }
 
 void Test_Array_shared_ptr()
