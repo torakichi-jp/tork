@@ -202,6 +202,30 @@ public:
         }
     }
 
+    // 要素への添え字アクセス
+    reference at(size_type i)
+    {
+        if (i >= size())
+            throw std::out_of_range("tork::Array out of range access");
+        return p_base_->data_[i];
+    }
+    const_reference at(size_type i) const
+    {
+        if (i >= size())
+            throw std::out_of_range("tork::Array out of range access");
+        return p_base_->data_[i];
+    }
+
+    // operator []
+    reference operator [](size_type i)
+    {
+        return p_base_->data_[i];
+    }
+    const_reference operator [](size_type i) const
+    {
+        return p_base_->data_[i];
+    }
+
     // 容量
     size_type capacity() const { return p_base_ ? p_base_->capacity_ : 0; }
 

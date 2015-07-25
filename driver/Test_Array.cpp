@@ -30,6 +30,12 @@ void Test_Array_int()
 	}
 	cout << endl;
 
+	for (size_t i = 0; i < a.size(); ++i) {
+		a[i] *= 10;
+		cout << a.at(i) << ' ';
+	}
+	cout << endl;
+
 	a.clear();
 }
 
