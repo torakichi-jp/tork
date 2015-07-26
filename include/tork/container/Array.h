@@ -24,15 +24,15 @@ struct ArrayBase {
 
     typedef std::allocator_traits<allocator_type> alloc_traits;
 
+    allocator_type alloc_;
     T* data_ = nullptr;
     size_type capacity_ = 0;
     size_type size_ = 0;
-    allocator_type alloc_;
 
 
-    ArrayBase(allocator_type& a, size_type n)
-        :alloc_(a), data_(alloc_traits::allocate(a, n)),
-        size_(0), capacity_(n)
+    ArrayBase(const allocator_type& a, size_type n)
+        :alloc_(a), data_(alloc_traits::allocate(alloc_, n)),
+        capacity_(n), size_(0)
     {
 
     }
@@ -80,6 +80,25 @@ public:
 
     // デフォルトコンストラクタ
     Array() { }
+
+    explicit Array(const Allocator& a)
+        :p_base_(create_base(8, a))
+    {
+
+    }
+
+    explicit Array(size_type n, const Allocator& a = Allocator())
+        :p_base_(create_base(n, a))
+    {
+        resize(n);
+    }
+
+    Array(size_type n, const T& value,
+            const Allocator& a = Allocator())
+        :p_base_(create_base(n, a))
+    {
+        resize(n, value);
+    }
 
     // デストラクタ
     ~Array()
@@ -315,7 +334,7 @@ private:
     }
 
     // 配列ベース作成
-    static Base* create_base(size_type s, allocator_type& alloc)
+    static Base* create_base(size_type s, const allocator_type& alloc)
     {
         using traits = AllocTraits::rebind_traits<Base>;
         AllocTraits::rebind_alloc<Base> a = alloc;

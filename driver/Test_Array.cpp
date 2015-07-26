@@ -40,6 +40,8 @@ void Test_Array_int()
 	a.swap(b);
 
 	a.clear();
+
+	Array<int> a2(5);
 }
 
 void Test_Array_shared_ptr()
