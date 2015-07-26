@@ -41,7 +41,12 @@ void Test_Array_int()
 
 	a.clear();
 
-	Array<int> a2(5);
+	Array<int> a2(5, 10);
+	Array<int> a3(b.begin(), b.end());
+	for (auto i : a3) {
+		cout << i << ' ';
+	}
+	cout << endl;
 }
 
 void Test_Array_shared_ptr()

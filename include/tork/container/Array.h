@@ -10,6 +10,7 @@
 #include <memory>
 #include <iterator>
 #include <utility>
+#include <type_traits>
 #include <cassert>
 #include "../memory/allocator.h"
 
@@ -98,6 +99,17 @@ public:
         :p_base_(create_base(n, a))
     {
         resize(n, value);
+    }
+
+    template<class InputIter,
+        class = typename std::enable_if<
+            !std::is_integral<InputIter>::value, void>::type>
+    Array(InputIter first, InputIter last,
+            const Allocator& a = Allocator())
+        :p_base_(nullptr)
+    {
+        ConstructByIter(first, last, a,
+                typename std::iterator_traits<InputIter>::iterator_category());
     }
 
     // デストラクタ
@@ -363,6 +375,35 @@ private:
             traits::destroy(a, p);
             traits::deallocate(a, p, sizeof(Base));
         }
+    }
+
+    // 入力イテレータによる構築
+    template<class InputIter>
+    void ConstructByIter(InputIter first, InputIter last,
+            const Allocator& a, std::input_iterator_tag)
+    {
+        p_base_ = create_base(8, a);
+        if (p_base_ == nullptr || p_base_->data_ == nullptr) return;
+
+        for (auto it = first; it != last; ++it) {
+            emplace_back(*it);
+        }
+    }
+
+    // 前進イテレータによる構築
+    template<class ForwardIter>
+    void ConstructByIter(ForwardIter first, ForwardIter last,
+            const Allocator& a, std::forward_iterator_tag)
+    {
+        p_base_ = create_base(std::distance(first, last), a);
+        if (p_base_ == nullptr || p_base_->data_ == nullptr) return;
+
+        size_type i = 0;
+        for (auto it = first; it != last; ++it) {
+            AllocTraits::construct(p_base_->alloc_, &p_base_->data_[i], *it);
+            ++i;
+        }
+        p_base_->size_ = i;
     }
 
 };  // class Array
