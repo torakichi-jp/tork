@@ -91,6 +91,8 @@ public:
     void push_back(const T& value)
     {
         expand_capacity();
+        if (p_base_ == nullptr) return;
+
         AllocTraits::construct(
                 p_base_->alloc_, &data()[size()], value);
         ++p_base_->size_;
@@ -100,6 +102,8 @@ public:
     void push_back(T&& value)
     {
         expand_capacity();
+        if (p_base_ == nullptr) return;
+
         AllocTraits::construct(
                 p_base_->alloc_, &data()[size()], std::move(value));
         ++p_base_->size_;
@@ -110,6 +114,8 @@ public:
     void emplace_back(Args&&... args)
     {
         expand_capacity();
+        if (p_base_ == nullptr) return;
+
         AllocTraits::construct(
                 p_base_->alloc_, &data()[size()], std::forward<Args>(args)...);
         ++p_base_->size_;
@@ -133,6 +139,7 @@ public:
         }
         else if (sz > size()) {
             reserve(sz);
+            if (p_base_ == nullptr) return;
             for (size_type i = 0; i < sz - size(); ++i) {
                 AllocTraits::construct(
                         p_base_->alloc_, &data()[size() + i], std::move(T()));
@@ -149,6 +156,7 @@ public:
         }
         else if (sz > size()) {
             reserve(sz);
+            if (p_base_ == nullptr) return;
             for (size_type i = 0; i < sz - size(); ++i) {
                 AllocTraits::construct(
                         p_base_->alloc_, &data()[size() + i], value);
@@ -212,13 +220,13 @@ public:
     // 要素への添え字アクセス
     reference at(size_type i)
     {
-        if (i >= size())
+        if (p_base_ == nullptr || i >= size())
             throw std::out_of_range("tork::Array out of range access");
         return p_base_->data_[i];
     }
     const_reference at(size_type i) const
     {
-        if (i >= size())
+        if (p_base_ == nullptr || i >= size())
             throw std::out_of_range("tork::Array out of range access");
         return p_base_->data_[i];
     }
