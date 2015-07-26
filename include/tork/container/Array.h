@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <iterator>
+#include <utility>
 #include <cassert>
 #include "../memory/allocator.h"
 
@@ -200,6 +201,12 @@ public:
             destroy_base(p);
             throw;
         }
+    }
+
+    // スワップ
+    void swap(Array& other)
+    {
+        std::swap(p_base_, other.p_base_);
     }
 
     // 要素への添え字アクセス

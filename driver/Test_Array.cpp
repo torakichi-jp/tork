@@ -36,6 +36,9 @@ void Test_Array_int()
 	}
 	cout << endl;
 
+	Array<int> b;
+	a.swap(b);
+
 	a.clear();
 }
 
