@@ -9,6 +9,18 @@ using std::cout;
 using std::endl;
 using tork::Array;
 
+namespace {
+	template<class T>
+	void print(const Array<T>& a)
+	{
+		cout << "{ ";
+		for (auto v : a) {
+			cout << v << ' ';
+		}
+		cout << "}" << endl;
+	}
+}
+
 void Test_Array_int()
 {
 	cout << "*** test Array<int> ***" << endl;
@@ -19,10 +31,7 @@ void Test_Array_int()
 	}
 
 	// 全要素出力
-	for (auto i : a) {
-		cout << i << ' ';
-	}
-	cout << endl;
+	print(a);
 
 	// 逆イテレータ
 	for (auto rit = a.rbegin(); rit != a.rend(); ++rit) {
@@ -38,15 +47,23 @@ void Test_Array_int()
 
 	Array<int> b;
 	a.swap(b);
-
 	a.clear();
 
-	Array<int> a2(5, 10);
-	Array<int> a3(b.begin(), b.end());
-	for (auto i : a3) {
-		cout << i << ' ';
-	}
-	cout << endl;
+	Array<int> a2(3, 999);
+	a2.emplace_back(20);
+	a2.emplace_back(32);
+	print(a2);
+
+	Array<int> a3(b.cbegin(), b.cend());
+	a3.pop_back();
+	a3.pop_back();
+	print(a3);
+
+	Array<int> a4 = a3;
+	print(a4);
+
+	Array<int> a5 = std::move(a4);
+	print(a5);
 }
 
 void Test_Array_shared_ptr()

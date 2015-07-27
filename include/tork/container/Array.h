@@ -88,12 +88,14 @@ public:
 
     }
 
+    // サイズ（＋アロケータ）
     explicit Array(size_type n, const Allocator& a = Allocator())
         :p_base_(create_base(n, a))
     {
         resize(n);
     }
 
+    // サイズと値（＋アロケータ）
     Array(size_type n, const T& value,
             const Allocator& a = Allocator())
         :p_base_(create_base(n, a))
@@ -101,6 +103,7 @@ public:
         resize(n, value);
     }
 
+    // イテレータ（＋アロケータ）
     template<class InputIter,
         class = typename std::enable_if<
             !std::is_integral<InputIter>::value, void>::type>
@@ -110,6 +113,53 @@ public:
     {
         ConstructByIter(first, last, a,
                 typename std::iterator_traits<InputIter>::iterator_category());
+    }
+
+    // コピーコンストラクタ
+    Array(const Array& other)
+        :Array(other,
+                AllocTraits::select_on_container_copy_construction(other.get_allocator()))
+    {
+
+    }
+
+    // 他のArrayとアロケータ
+    Array(const Array& other, const Allocator& a)
+        :Array(other.begin(), other.end(), a)
+    {
+
+    }
+
+    // ムーブコンストラクタ
+    Array(Array&& other)
+        :p_base_(other.p_base_)
+    {
+        other.p_base_ = nullptr;
+    }
+
+    // 他のArray(Move)とアロケータ
+    Array(Array&& other, const Allocator& a)
+        :p_base_(nullptr)
+    {
+        if (other.get_allocator() == a) {
+            p_base_ = other.p_base_;
+            p_base_->alloc_ = a;
+        }
+        else if (!other.empty()) {
+            Base* p = create_base(other.size(), a);
+            if (p == nullptr || p->data_ == nullptr) return;
+            for (size_type i = 0; i < other.size(); ++i) {
+                AllocTraits::construct(a, &p[i], std::move(other[i]));
+            }
+            p->size_ = other.size();
+            p_base_ = p;
+            destroy_base(other.p_base_);
+        }
+        else {
+            p_base_ = create_base(8, a);
+            destroy_base(other.p_base_);
+        }
+        other.p_base_ = nullptr;
     }
 
     // デストラクタ
