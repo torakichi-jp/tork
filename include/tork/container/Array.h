@@ -12,6 +12,7 @@
 #include <utility>
 #include <type_traits>
 #include <cassert>
+#include <initializer_list>
 #include "../memory/allocator.h"
 
 namespace tork {
@@ -137,7 +138,7 @@ public:
         other.p_base_ = nullptr;
     }
 
-    // 他のArray(Move)とアロケータ
+    // 他のArray(rvalue)とアロケータ
     Array(Array&& other, const Allocator& a)
         :p_base_(nullptr)
     {
@@ -160,6 +161,14 @@ public:
             destroy_base(other.p_base_);
         }
         other.p_base_ = nullptr;
+    }
+
+    // 初期化子リスト
+    Array(std::initializer_list<T> il,
+            const Allocator& a = Allocator())
+        :Array(il.begin(), il.end(), a)
+    {
+
     }
 
     // デストラクタ
