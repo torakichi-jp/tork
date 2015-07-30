@@ -15,6 +15,7 @@
 #include <initializer_list>
 #include <algorithm>
 #include "../memory/allocator.h"
+#include "../memory/unique_ptr.h"
 
 namespace tork {
 
@@ -151,7 +152,7 @@ public:
             Base* p = create_base(other.size(), a);
             if (p == nullptr || p->data_ == nullptr) return;
             for (size_type i = 0; i < other.size(); ++i) {
-                AllocTraits::construct(a, &p[i], std::move(other[i]));
+                AllocTraits::construct(a, &p->data_[i], std::move(other[i]));
             }
             p->size_ = other.size();
             p_base_ = p;
@@ -204,6 +205,24 @@ public:
         destroy_base(p_base_);
         p_base_ = other.p_base_;
         other.p_base_ = nullptr;
+
+        return *this;
+    }
+
+    // 初期化子リスト代入
+    Array& operator =(std::initializer_list<T> il)
+    {
+        allocator_type a = get_allocator();
+        Base* p = create_base(il.size(), a);
+        int i = 0;
+        for (auto it = il.begin(); it != il.end(); ++it) {
+            AllocTraits::construct(a, &p->data_[i], *it);
+            ++i;
+        }
+        p->size_ = il.size();
+
+        destroy_base(p_base_);
+        p_base_ = p;
 
         return *this;
     }
@@ -501,6 +520,13 @@ private:
         }
         p_base_->size_ = i;
     }
+
+
+    struct DestroyBase {
+        void operator ()(Base* p) {
+            Array<T, Allocator>::destroy_base(p);
+        }
+    };
 
 };  // class Array
 

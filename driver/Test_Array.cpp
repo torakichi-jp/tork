@@ -76,6 +76,9 @@ void Test_Array_int()
 	Array<int> a7{ 10, 11, 12, 13, 14 };
 	a5 = std::move(a7);
 	print(a5);
+
+	a5 = { 55, 66, 77, 88 };
+	print(a5);
 }
 
 void Test_Array_shared_ptr()
