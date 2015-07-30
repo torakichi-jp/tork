@@ -13,6 +13,7 @@
 #include <type_traits>
 #include <cassert>
 #include <initializer_list>
+#include <algorithm>
 #include "../memory/allocator.h"
 
 namespace tork {
@@ -177,6 +178,36 @@ public:
         destroy_base(p_base_);
     }
 
+    // コピー演算子
+    Array& operator =(const Array& other)
+    {
+        if (*this == other) return *this;
+
+        allocator_type a = other.get_allocator();
+        Base* p = create_base(other.capacity(), a);
+        for (size_type i = 0; i < other.size(); ++i) {
+            AllocTraits::construct(a, &p->data_[i], other[i]);
+        }
+        p->size_ = other.size();
+
+        destroy_base(p_base_);
+        p_base_ = p;
+
+        return *this;
+    }
+
+    // ムーブ演算子
+    Array& operator =(Array&& other)
+    {
+        if (*this == other) return *this;
+
+        destroy_base(p_base_);
+        p_base_ = other.p_base_;
+        other.p_base_ = nullptr;
+
+        return *this;
+    }
+
     // 末尾に追加
     void push_back(const T& value)
     {
@@ -301,9 +332,10 @@ public:
         }
     }
 
+    // 容量をサイズにフィットさせる
     void shrink_to_fit()
     {
-        Array<T>(*this).swap(*this);
+        Array<T, Allocator>(*this).swap(*this);
     }
 
     // スワップ
@@ -471,6 +503,19 @@ private:
     }
 
 };  // class Array
+
+// operator ==()
+template<class T, class A>
+bool operator ==(const Array<T, A> x, const Array<T, A> y)
+{
+    if (x.size() != y.size()) return false;
+
+    for (size_t i = 0; i < x.size(); ++i) {
+        if (x[i] == y[i]) continue;
+        return false;
+    }
+    return true;
+}
 
 }   // namespace tork
 
