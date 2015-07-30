@@ -67,6 +67,8 @@ void Test_Array_int()
 
 	Array<int> a6{ 5, 6, 7, 8 };
 	print(a6);
+	a6.reserve(100);
+	a6.shrink_to_fit();
 }
 
 void Test_Array_shared_ptr()

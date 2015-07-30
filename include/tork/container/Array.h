@@ -301,6 +301,11 @@ public:
         }
     }
 
+    void shrink_to_fit()
+    {
+        Array<T>(*this).swap(*this);
+    }
+
     // スワップ
     void swap(Array& other)
     {
