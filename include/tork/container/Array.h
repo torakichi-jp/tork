@@ -328,25 +328,20 @@ public:
             return;
         }
 
-        Base* p = create_base(s, p_base_->alloc_);
+        unique_ptr<Base, BaseDeleter>
+            p(create_base(s, p_base_->alloc_), BaseDeleter());
         if (p == nullptr || p->data_ == nullptr) return;
-        try {
-            // 要素のムーブ
-            for (size_type i = 0; i < size(); ++i) {
-                AllocTraits::construct(
-                        p->alloc_, &p->data_[i], std::move(p_base_->data_[i]));
-            }
-            p->size_ = size();
-
-            // 古い要素の削除
-            destroy_base(p_base_);
-
-            p_base_ = p;
+        // 要素のムーブ
+        for (size_type i = 0; i < size(); ++i) {
+            AllocTraits::construct(
+                    p->alloc_, &p->data_[i], std::move(p_base_->data_[i]));
         }
-        catch (...) {
-            destroy_base(p);
-            throw;
-        }
+        p->size_ = size();
+
+        // 古い要素の削除
+        destroy_base(p_base_);
+
+        p_base_ = p.release();
     }
 
     // 容量をサイズにフィットさせる
@@ -514,15 +509,17 @@ private:
     void ConstructByIter(ForwardIter first, ForwardIter last,
             const Allocator& a, std::forward_iterator_tag)
     {
-        p_base_ = create_base(std::distance(first, last), a);
-        if (p_base_ == nullptr || p_base_->data_ == nullptr) return;
+        unique_ptr<Base, BaseDeleter>
+            p(create_base(std::distance(first, last), a), BaseDeleter());
+        if (p == nullptr || p->data_ == nullptr) return;
 
         size_type i = 0;
         for (auto it = first; it != last; ++it) {
-            AllocTraits::construct(p_base_->alloc_, &p_base_->data_[i], *it);
+            AllocTraits::construct(p->alloc_, &p->data_[i], *it);
             ++i;
         }
-        p_base_->size_ = i;
+        p->size_ = i;
+        p_base_ = p.release();
     }
 
 };  // class Array
