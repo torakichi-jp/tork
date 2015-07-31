@@ -149,13 +149,14 @@ public:
             p_base_->alloc_ = a;
         }
         else if (!other.empty()) {
-            Base* p = create_base(other.size(), a);
+            unique_ptr<Base, BaseDeleter>
+                p(create_base(other.size(), a), BaseDeleter());
             if (p == nullptr || p->data_ == nullptr) return;
             for (size_type i = 0; i < other.size(); ++i) {
                 AllocTraits::construct(a, &p->data_[i], std::move(other[i]));
             }
             p->size_ = other.size();
-            p_base_ = p;
+            p_base_ = p.release();
             destroy_base(other.p_base_);
         }
         else {
@@ -185,14 +186,15 @@ public:
         if (*this == other) return *this;
 
         allocator_type a = other.get_allocator();
-        Base* p = create_base(other.capacity(), a);
+        unique_ptr<Base, BaseDeleter>
+            p(create_base(other.capacity(), a), BaseDeleter());
         for (size_type i = 0; i < other.size(); ++i) {
             AllocTraits::construct(a, &p->data_[i], other[i]);
         }
         p->size_ = other.size();
 
         destroy_base(p_base_);
-        p_base_ = p;
+        p_base_ = p.release();
 
         return *this;
     }
@@ -213,7 +215,8 @@ public:
     Array& operator =(std::initializer_list<T> il)
     {
         allocator_type a = get_allocator();
-        Base* p = create_base(il.size(), a);
+        unique_ptr<Base, BaseDeleter>
+            p(create_base(il.size(), a), BaseDeleter());
         int i = 0;
         for (auto it = il.begin(); it != il.end(); ++it) {
             AllocTraits::construct(a, &p->data_[i], *it);
@@ -222,7 +225,7 @@ public:
         p->size_ = il.size();
 
         destroy_base(p_base_);
-        p_base_ = p;
+        p_base_ = p.release();
 
         return *this;
     }
@@ -270,7 +273,9 @@ public:
     }
 
     // サイズ変更
-    void resize(size_type sz)
+private:
+    template<class Arg>
+    void ResizeImpl(size_type sz, Arg&& value)
     {
         if (sz < size()) {
             for (size_type i = 0; i < size() - sz; ++i) {
@@ -282,27 +287,20 @@ public:
             if (p_base_ == nullptr) return;
             for (size_type i = 0; i < sz - size(); ++i) {
                 AllocTraits::construct(
-                        p_base_->alloc_, &data()[size() + i], std::move(T()));
+                        p_base_->alloc_, &data()[size() + i], std::forward<Arg>(value));
             }
             p_base_->size_ = sz;
         }
     }
+public:
+    void resize(size_type sz)
+    {
+        ResizeImpl(sz, std::move(T()));
+    }
+
     void resize(size_type sz, const T& value)
     {
-        if (sz < size()) {
-            for (size_type i = 0; i < size() - sz; ++i) {
-                pop_back();
-            }
-        }
-        else if (sz > size()) {
-            reserve(sz);
-            if (p_base_ == nullptr) return;
-            for (size_type i = 0; i < sz - size(); ++i) {
-                AllocTraits::construct(
-                        p_base_->alloc_, &data()[size() + i], value);
-            }
-            p_base_->size_ = sz;
-        }
+        ResizeImpl(sz, value);
     }
 
     // 要素のクリア
@@ -492,6 +490,12 @@ private:
         }
     }
 
+    struct BaseDeleter {
+        void operator ()(Base* p) {
+            Array<T, Allocator>::destroy_base(p);
+        }
+    };
+
     // 入力イテレータによる構築
     template<class InputIter>
     void ConstructByIter(InputIter first, InputIter last,
@@ -520,13 +524,6 @@ private:
         }
         p_base_->size_ = i;
     }
-
-
-    struct DestroyBase {
-        void operator ()(Base* p) {
-            Array<T, Allocator>::destroy_base(p);
-        }
-    };
 
 };  // class Array
 
