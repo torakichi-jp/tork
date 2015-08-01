@@ -184,18 +184,7 @@ public:
     Array& operator =(const Array& other)
     {
         if (*this == other) return *this;
-
-        allocator_type a = other.get_allocator();
-        unique_ptr<Base, BaseDeleter>
-            p(create_base(other.capacity(), a), BaseDeleter());
-        for (size_type i = 0; i < other.size(); ++i) {
-            AllocTraits::construct(a, &p->data_[i], other[i]);
-        }
-        p->size_ = other.size();
-
-        destroy_base(p_base_);
-        p_base_ = p.release();
-
+        assign(other.begin(), other.end());
         return *this;
     }
 
@@ -214,20 +203,32 @@ public:
     // 初期化子リスト代入
     Array& operator =(std::initializer_list<T> il)
     {
-        allocator_type a = get_allocator();
-        unique_ptr<Base, BaseDeleter>
-            p(create_base(il.size(), a), BaseDeleter());
-        int i = 0;
-        for (auto it = il.begin(); it != il.end(); ++it) {
-            AllocTraits::construct(a, &p->data_[i], *it);
-            ++i;
-        }
-        p->size_ = il.size();
-
-        destroy_base(p_base_);
-        p_base_ = p.release();
-
+        assign(il.begin(), il.end());
         return *this;
+    }
+
+    // 要素の割り当て
+    template<class InputIter,
+        class = typename std::enable_if<
+            !std::is_integral<InputIter>::value, void>::type>
+    void assign(InputIter first, InputIter last)
+    {
+        Base* p = CreateByIter(first, last, get_allocator(),
+                typename std::iterator_traits<InputIter>::iterator_category());
+        if (p == nullptr) return;
+        destroy_base(p_base_);
+        p_base_ = p;
+    }
+
+    void assign(size_type n, const T& u)
+    {
+        clear();
+        resize(n, u);
+    }
+
+    void assign(std::initializer_list<T> il)
+    {
+        assign(il.begin(), il.end());
     }
 
     // 末尾に追加
@@ -295,7 +296,7 @@ private:
 public:
     void resize(size_type sz)
     {
-        ResizeImpl(sz, std::move(T()));
+        ResizeImpl(sz, T());
     }
 
     void resize(size_type sz, const T& value)
@@ -522,6 +523,53 @@ private:
         p_base_ = p.release();
     }
 
+    // 入力イテレータによる構築
+    template<class InputIter>
+    Base* CreateByIter(InputIter first, InputIter last,
+            const Allocator& a, std::input_iterator_tag)
+    {
+        unique_ptr<Base, BaseDeleter>
+            p(create_base(8, a), BaseDeleter());
+        if (p == nullptr || p->data_ == nullptr) return nullptr;
+
+        for (auto it = first; it != last; ++it) {
+            size_type& sz = p->size_;
+            AllocTraits::construct(p->alloc_, &p->data_[sz], *it);
+            ++sz;
+            // 容量がいっぱいになった
+            if (p->capacity_ == sz) {
+                unique_ptr<Base, BaseDeleter>
+                    tmp(create_base(p->capacity_ * 2, p->alloc_), BaseDeleter());
+                if (tmp == nullptr || p->data_ == nullptr) return nullptr;
+                for (size_type i = 0; i < sz; ++i) {
+                    AllocTraits::construct(tmp->alloc_,
+                            &tmp->data_[i], std::move(p->data[i]));
+                }
+                tmmp->size_ = sz;
+                tmp.swap(p);
+                destroy_base(tmp.release());
+            }
+        }
+        return p.release();
+    }
+
+    // 前進イテレータによる構築
+    template<class ForwardIter>
+    Base* CreateByIter(ForwardIter first, ForwardIter last,
+            const Allocator& a, std::forward_iterator_tag)
+    {
+        unique_ptr<Base, BaseDeleter>
+            p(create_base(std::distance(first, last), a), BaseDeleter());
+        if (p == nullptr || p->data_ == nullptr) return nullptr;
+
+        size_type i = 0;
+        for (auto it = first; it != last; ++it) {
+            AllocTraits::construct(p->alloc_, &p->data_[i], *it);
+            ++i;
+        }
+        p->size_ = i;
+        return p.release();
+    }
 };  // class Array
 
 // operator ==()

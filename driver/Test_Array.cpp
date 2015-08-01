@@ -79,6 +79,9 @@ void Test_Array_int()
 
 	a5 = { 55, 66, 77, 88 };
 	print(a5);
+
+	a5.assign(3, 999);
+	print(a5);
 }
 
 void Test_Array_shared_ptr()
