@@ -4,6 +4,8 @@
 #include <tork/memory/shared_ptr.h>
 #include <algorithm>
 #include <vector>
+#include <sstream>
+#include <iterator>
 
 using std::cout;
 using std::endl;
@@ -82,6 +84,22 @@ void Test_Array_int()
 
 	a5.assign(3, 999);
 	print(a5);
+
+	// 入力イテレータによる構築など
+	{
+		std::stringstream ss;
+		ss << "0 1 2 3 4 5 6 7 8 9";
+		std::istream_iterator<int> it(ss);
+		std::istream_iterator<int> last;
+		Array<int> v(it, last);
+		print(v);
+
+		ss.clear();
+		ss << "10 20 30 40 50 60 70 80 90 100";
+		Array<int> v2;
+		v2.assign(it, last);
+		print(v2);
+	}
 }
 
 void Test_Array_shared_ptr()

@@ -543,9 +543,9 @@ private:
                 if (tmp == nullptr || p->data_ == nullptr) return nullptr;
                 for (size_type i = 0; i < sz; ++i) {
                     AllocTraits::construct(tmp->alloc_,
-                            &tmp->data_[i], std::move(p->data[i]));
+                            &tmp->data_[i], std::move(p->data_[i]));
                 }
-                tmmp->size_ = sz;
+                tmp->size_ = sz;
                 tmp.swap(p);
                 destroy_base(tmp.release());
             }
