@@ -538,14 +538,18 @@ private:
             ++sz;
             // 容量がいっぱいになった
             if (p->capacity_ == sz) {
+                // 2倍の領域を確保
                 unique_ptr<Base, BaseDeleter>
                     tmp(create_base(p->capacity_ * 2, p->alloc_), BaseDeleter());
                 if (tmp == nullptr || p->data_ == nullptr) return nullptr;
+                // 要素の移動
                 for (size_type i = 0; i < sz; ++i) {
                     AllocTraits::construct(tmp->alloc_,
                             &tmp->data_[i], std::move(p->data_[i]));
                 }
                 tmp->size_ = sz;
+
+                // p と入れ替え
                 tmp.swap(p);
                 destroy_base(tmp.release());
             }
