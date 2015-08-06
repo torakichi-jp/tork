@@ -96,6 +96,7 @@
     <ClInclude Include="..\include\tork\app\OptionStream.h" />
     <ClInclude Include="..\include\tork\container.h" />
     <ClInclude Include="..\include\tork\container\Array.h" />
+    <ClInclude Include="..\include\tork\container\SharedArray.h" />
     <ClInclude Include="..\include\tork\container\Vector.h" />
     <ClInclude Include="..\include\tork\debug.h" />
     <ClInclude Include="..\include\tork\define.h" />

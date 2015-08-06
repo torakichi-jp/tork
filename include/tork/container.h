@@ -3,5 +3,6 @@
 
 #include "container/Vector.h"
 #include "container/Array.h"
+#include "container/SharedArray.h"
 
 #endif  // TORK_CONTAINER_H_INCLUDED

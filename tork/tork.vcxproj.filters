@@ -90,6 +90,9 @@
     <ClInclude Include="..\include\tork\container\Array.h">
       <Filter>ヘッダー ファイル\tork\container</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\tork\container\SharedArray.h">
+      <Filter>ヘッダー ファイル\tork\container</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

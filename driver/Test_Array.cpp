@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 
 #include <tork/container/Array.h>
+#include <tork/container/SharedArray.h>
 #include <tork/memory/shared_ptr.h>
 #include <algorithm>
 #include <vector>
@@ -21,6 +22,14 @@ namespace {
 		}
 		cout << "}" << endl;
 	}
+
+void Test_SharedArrayObject()
+{
+	using Obj = tork::impl::SharedArrayObject<int, std::allocator<int>>;
+	Obj* pObj = Obj::create(std::allocator<int>(), 10);
+	pObj->expand(20);
+	pObj->clear();
+	Obj::destroy(pObj);
 }
 
 void Test_Array_int()
@@ -121,8 +130,12 @@ void Test_Array_shared_ptr()
 	cout << endl;
 }
 
+} // annonymous namespace
+
 void Test_Array()
 {
-	Test_Array_int();
-	Test_Array_shared_ptr();
+	//Test_Array_int();
+	//Test_Array_shared_ptr();
+
+	Test_SharedArrayObject();
 }
