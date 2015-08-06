@@ -11,6 +11,7 @@
 using std::cout;
 using std::endl;
 using tork::Array;
+using tork::SharedArray;
 
 namespace {
 	template<class T>
@@ -38,6 +39,12 @@ void Test_SharedArrayObject()
 	}
 	pObj->clear();
 	Obj::destroy(pObj);
+}
+
+void Test_SharedArray_int()
+{
+	SharedArray<int> a;
+	a.push_back(20);
 }
 
 void Test_Array_int()
@@ -145,5 +152,7 @@ void Test_Array()
 	//Test_Array_int();
 	//Test_Array_shared_ptr();
 
-	Test_SharedArrayObject();
+	//Test_SharedArrayObject();
+
+	Test_SharedArray_int();
 }

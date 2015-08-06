@@ -181,6 +181,78 @@ private:
 
     ObjType* p_obj_ = nullptr;
 
+public:
+
+    SharedArray() {}
+
+    ~SharedArray()
+    {
+        ObjType::destroy(p_obj_);
+    }
+
+    // 末尾に追加
+    void push_back(const T& value)
+    {
+        if (p_obj_ == nullptr) reserve(8);
+        p_obj_->add(value);
+    }
+
+    // 末尾に追加（ムーブ構築）
+    void push_back(T&& value)
+    {
+        if (p_obj_ == nullptr) reserve(8);
+        p_obj_->add(std::move(value));
+    }
+
+    // 末尾に構築
+    template<class... Args>
+    void emplace_back(Args&&... args)
+    {
+        if (p_obj_ == nullptr) reserve(8);
+        p_obj_->add(std::forward<Args>(args)...);
+    }
+
+    // 末尾から削除
+    void pop_back()
+    {
+        p_obj_->pop_back();
+    }
+
+    // サイズ変更
+    void resize(size_type n)
+    {
+        if (p_obj_ == nullptr) reserve(n);
+        p_obj_->resize(n, T());
+    }
+
+    void resize(size_type n, const T& value)
+    {
+        if (p_obj_ == nullptr) reserve(n);
+        p_obj_->resize(n, value);
+    }
+
+    // 要素のクリア
+    void clear()
+    {
+        if (p_obj_) p_obj_->clear();
+    }
+
+    // 容量の予約
+    void reserve(size_type n)
+    {
+        assert(n > 0);
+        if (p_obj_ == nullptr) {
+            // 空だったら配列オブジェクトを作成
+            p_obj_ = ObjType::create(allocator_type(), n);
+        }
+        else if (n > capacity()) {
+            p_obj_->expand(n);
+        }
+    }
+
+    // 容量
+    size_type capacity() const { return p_obj_ ? p_obj_->capacity : 0; }
+
 };  // class SharedArray
 
 }
