@@ -150,6 +150,19 @@ struct SharedArrayObject {
         }
     }
 
+    void inc_ref()
+    {
+        ++ref_counter;
+    }
+
+    void dec_ref()
+    {
+        --ref_counter;
+        if (ref_counter == 0) {
+            destroy(this);
+        }
+    }
+
 };  // struct SharedArrayObject
 
     }   // namespace tork::impl
@@ -187,7 +200,7 @@ public:
 
     ~SharedArray()
     {
-        ObjType::destroy(p_obj_);
+        if (p_obj_) p_obj_->dec_ref();
     }
 
     // 末尾に追加
