@@ -28,6 +28,14 @@ void Test_SharedArrayObject()
 	using Obj = tork::impl::SharedArrayObject<int, std::allocator<int>>;
 	Obj* pObj = Obj::create(std::allocator<int>(), 10);
 	pObj->expand(20);
+	pObj->add(20);
+	pObj->add(30);
+	pObj->pop_back();
+	pObj->resize(20, 999);
+	pObj->resize(5, 100);
+	for (size_t i = 0; i < pObj->size; ++i) {
+		cout << pObj->p_data[i] << endl;
+	}
 	pObj->clear();
 	Obj::destroy(pObj);
 }
