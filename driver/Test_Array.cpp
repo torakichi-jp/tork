@@ -141,7 +141,9 @@ void Test_SharedArrayObject()
 
 void Test_SharedArray_int()
 {
-	SharedArray<int> a;
+	using IntArray = SharedArray<int>;
+
+	IntArray a;
 	a.push_back(20);
 	print(a);
 }

@@ -8,6 +8,11 @@
 #define TORK_CONTAINER_SHARED_ARRAY_H_INCLUDED
 
 #include <memory>
+#include <iterator>
+#include <utility>
+#include <algorithm>
+#include <initializer_list>
+#include <type_traits>
 #include <cassert>
 
 namespace tork {
@@ -71,6 +76,61 @@ struct SharedArrayObject {
 
         traits::destroy(allocObj, p);
         traits::deallocate(allocObj, p, sizeof(SharedArrayObject));
+    }
+
+    // イテレータによる構築
+    template<class Iter>
+    static SharedArrayObject* construct(const A& a, Iter first, Iter last)
+    {
+        auto del = [](T* ptr){ destroy(ptr); };
+        std::iterator_traits<Iter>::iterator_category iter_tag;
+
+        size_type n = get_first_capacity(first, last, iter_tag);
+
+        std::unique_ptr<T, decltype(del)> p(create(a, n), del);
+
+        p->assign(first, last, iter_tag);
+
+        return p.release();
+    }
+
+    // 構築時のサイズ取得（イテレータ型でディスパッチ）
+    template<class InputIter>
+    static size_type get_first_capacity(InputIter first, InputIter last,
+            std::input_iterator_tag)
+    {
+        return 8;
+    }
+    template<class ForwardIter>
+    static size_type get_first_capacity(ForwardIter first, ForwardIter last,
+            std::forward_iterator_tag)
+    {
+        return std::distance(first, last);
+    }
+
+    // 入力イテレータによる要素の割り当て
+    template<class InputIter>
+    void assign(InputIter first, InputIter last, std::input_iterator_tag)
+    {
+        clear();
+
+        for (auto it = first; it != last; ++it) {
+            add(*it);
+        }
+    }
+
+    // 前進イテレータによる要素の割り当て
+    template<class ForwardIter>
+    void assign(ForwardIter first, ForwardIter last, std::forward_iterator_tag)
+    {
+        clear();
+        expand(std::distance(first, last));
+
+        size_type i = 0;
+        for (auto it = first; it != last; ++it) {
+            AllocTraits::construct(alloc, &p_data[i], *it);
+        }
+        size = i;
     }
 
     // 容量を指定されたサイズに拡張する
@@ -150,11 +210,13 @@ struct SharedArrayObject {
         }
     }
 
+    // 参照カウンタ増
     void inc_ref()
     {
         ++ref_counter;
     }
 
+    // 参照カウンタ減
     void dec_ref()
     {
         --ref_counter;
