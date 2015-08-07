@@ -263,6 +263,30 @@ public:
         }
     }
 
+    // 要素への添え字アクセス
+    reference at(size_type i)
+    {
+        if (p_obj_ == nullptr || i >= size())
+            throw std::out_of_range("out of range at tork::SharedArray");
+        return p_obj_->p_data[i];
+    }
+    const_reference at(size_type i) const
+    {
+        if (p_obj_ == nullptr || i >= size())
+            throw std::out_of_range("out of range at tork::SharedArray");
+        return p_obj_->p_data[i];
+    }
+
+    // operator []
+    reference operator [](size_type i)
+    {
+        return p_obj_->p_data[i];
+    }
+    const_reference operator [](size_type i) const
+    {
+        return p_obj_->p_data[i];
+    }
+
     // 要素数
     size_type size() const { return p_obj_ ? p_obj_->size : 0; }
 
