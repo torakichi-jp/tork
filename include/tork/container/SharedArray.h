@@ -263,8 +263,65 @@ public:
         }
     }
 
+    // 要素数
+    size_type size() const { return p_obj_ ? p_obj_->size : 0; }
+
+    // 空かどうか
+    bool empty() const { return size() == 0; }
+
     // 容量
     size_type capacity() const { return p_obj_ ? p_obj_->capacity : 0; }
+
+    // 格納できる最大数
+    size_type max_size() const { return AllocTraits::max_size(get_allocator()); }
+
+    // アロケータ
+    allocator_type get_allocator() const {
+        return p_obj_ ? p_obj_->alloc : allocator_type();
+    }
+
+    // データの先頭を指すポインタ
+    T* data() const { return p_obj_ ? p_obj_->p_data : nullptr; }
+
+    // 先頭要素への参照
+    reference front() { return *data(); }
+    const_reference front() const { return *data(); }
+
+    // 末尾要素への参照
+    reference back() { return data()[size() - 1]; }
+    const_reference back() const { return data()[size() - 1]; }
+
+    // begin
+    iterator begin() { return p_obj_ ? data() : nullptr; }
+    const_iterator begin() const { return p_obj_ ? data() : nullptr; }
+
+    // end
+    iterator end() { return p_obj_ ? data() + size() : nullptr; }
+    const_iterator end() const { return p_obj_ ? data() + size() : nullptr; }
+
+    // rbegin
+    reverse_iterator rbegin() { return reverse_iterator(end()); }
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+
+    // rend
+    reverse_iterator rend() { return reverse_iterator(begin()); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+
+    // constイテレータ
+    const_iterator cbegin() const {
+        return static_cast<const ThisType*>(this)->begin();
+    }
+    const_iterator cend() const {
+        return static_cast<const ThisType*>(this)->end();
+    }
+
+    // const逆イテレータ
+    const_reverse_iterator crbegin() const {
+        return static_cast<const ThisType*>(this)->rbegin();
+    }
+    const_reverse_iterator crend() const {
+        return static_cast<const ThisType*>(this)->rend();
+    }
 
 };  // class SharedArray
 
