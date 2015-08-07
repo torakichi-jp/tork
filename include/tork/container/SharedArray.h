@@ -258,8 +258,32 @@ private:
 
 public:
 
+    // デフォルトコンストラクタ
     SharedArray() {}
 
+    // アロケータ指定
+    explicit SharedArray(const Allocator& a)
+        :p_obj_(ObjType::create(a, 8))
+    {
+
+    }
+
+    // サイズ（＋アロケータ）
+    explicit SharedArray(size_type n, const Allocator& a = Allocator())
+        :p_obj_(ObjType::create(a, n))
+    {
+        resize(n);
+    }
+
+    // サイズと値（＋アロケータ）
+    SharedArray(size_type n, const T& value,
+            const Allocator& a = Allocator())
+        :p_obj_(ObjType::create(a, n))
+    {
+        resize(n, value);
+    }
+
+    // デストラクタ
     ~SharedArray()
     {
         if (p_obj_) p_obj_->dec_ref();

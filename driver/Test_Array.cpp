@@ -144,8 +144,11 @@ void Test_SharedArray_int()
 	using IntArray = SharedArray<int>;
 
 	IntArray a;
-	a.push_back(20);
+	a.push_back(10);
 	print(a);
+
+	IntArray a2(5, 20);
+	print(a2);
 }
 
 } // annonymous namespace
