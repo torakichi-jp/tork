@@ -149,9 +149,31 @@ void Test_SharedArray_int()
 
 	IntArray a2(5, 20);
 	print(a2);
+
+	std::vector<int> v{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	IntArray a3(v.begin(), v.end());
+	print(a3);
+
+	{
+		std::stringstream ss;
+		ss << "0 10 20 30 40 50 60 70 80 90";
+		std::istream_iterator<int> it(ss);
+		std::istream_iterator<int> last;
+		IntArray ia(it, last);
+		print(ia);
+	}
+
+	IntArray a4 = a3;
+	print(a4);
+
+	IntArray a5 = std::move(a4);
+	print(a5);
+
+	IntArray a6{ 10, 9, 8, 7 };
+	print(a6);
 }
 
-} // annonymous namespace
+} // anonymous namespace
 
 void Test_Array()
 {

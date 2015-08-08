@@ -82,12 +82,12 @@ struct SharedArrayObject {
     template<class Iter>
     static SharedArrayObject* construct(const A& a, Iter first, Iter last)
     {
-        auto del = [](T* ptr){ destroy(ptr); };
+        auto del = [](SharedArrayObject* ptr){ destroy(ptr); };
         std::iterator_traits<Iter>::iterator_category iter_tag;
 
         size_type n = get_first_capacity(first, last, iter_tag);
 
-        std::unique_ptr<T, decltype(del)> p(create(a, n), del);
+        std::unique_ptr<SharedArrayObject, decltype(del)> p(create(a, n), del);
 
         p->assign(first, last, iter_tag);
 
@@ -129,6 +129,7 @@ struct SharedArrayObject {
         size_type i = 0;
         for (auto it = first; it != last; ++it) {
             AllocTraits::construct(alloc, &p_data[i], *it);
+            ++i;
         }
         size = i;
     }
@@ -281,6 +282,39 @@ public:
         :p_obj_(ObjType::create(a, n))
     {
         resize(n, value);
+    }
+
+    // イテレータ（＋アロケータ）
+    template<class InputIter,
+        class = typename std::enable_if<
+            !std::is_integral<InputIter>::value, void>::type>
+    SharedArray(InputIter first, InputIter last,
+            const Allocator& a = Allocator())
+        :p_obj_(ObjType::construct(a, first, last))
+    {
+
+    }
+
+    // コピーコンストラクタ
+    SharedArray(const SharedArray& x)
+        :p_obj_(x.p_obj_)
+    {
+        p_obj_->inc_ref();
+    }
+
+    // ムーブコンストラクタ
+    SharedArray(SharedArray&& x)
+        :p_obj_(x.p_obj_)
+    {
+        x.p_obj_ = nullptr;
+    }
+
+    // 初期化子リスト
+    SharedArray(std::initializer_list<T> il,
+            const Allocator& a = Allocator())
+        :SharedArray(il.begin(), il.end(), a)
+    {
+
     }
 
     // デストラクタ
