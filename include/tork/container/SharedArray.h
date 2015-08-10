@@ -331,7 +331,7 @@ public:
         if (p_obj_) p_obj_->dec_ref();
 
         p_obj_ = x.p_obj_;
-        p_obj_->inc_ref();
+        if (p_obj_) p_obj_->inc_ref();
 
         return *this;
     }
@@ -347,6 +347,37 @@ public:
         x.p_obj_ = nullptr;
 
         return *this;
+    }
+
+    // 初期化子リスト代入
+    SharedArray& operator =(std::initializer_list<T> il)
+    {
+        assign(il.begin(), il.end());
+        return *this;
+    }
+
+    // 要素の割り当て
+    template<class InputIter,
+        class = typename std::enable_if<
+            !std::is_integral<InputIter>::value, void>::type>
+    void assign(InputIter first, InputIter last)
+    {
+        std::iterator_traits<InputIter>::iterator_category iter_tag;
+        if (p_obj_ == nullptr) {
+            reserve(ObjType::get_first_capacity(first, last, iter_tag));
+        }
+        p_obj_->assign(first, last, iter_tag);
+    }
+
+    void assign(size_type n, const T& value)
+    {
+        clear();
+        resize(n, u);
+    }
+
+    void assign(std::initializer_list<T> il)
+    {
+        assign(il.begin(), il.end());
     }
 
     // 末尾に追加

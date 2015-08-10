@@ -177,6 +177,9 @@ void Test_SharedArray_int()
 
 	a4 = std::move(a6);
 	print(a4);
+
+	a4 = { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
+	print(a4);
 }
 
 } // anonymous namespace
