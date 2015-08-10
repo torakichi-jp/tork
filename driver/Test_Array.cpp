@@ -202,6 +202,11 @@ void Test_SharedArray_int()
 		a.erase(a.begin() + 2, a.end() - 2);
 		print(a);
 	}
+
+	IntArray a7;
+	a7.reserve(100);
+	a7 = { 0, 1, 2, 3 };
+	a7.shrink_to_fit();
 }
 
 } // anonymous namespace

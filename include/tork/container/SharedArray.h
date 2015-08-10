@@ -94,7 +94,7 @@ struct SharedArrayObject {
         return p.release();
     }
 
-    // 構築時のサイズ取得（イテレータ型でディスパッチ）
+    // 構築するサイズ取得（イテレータ型でディスパッチ）
     template<class InputIter>
     static size_type get_first_capacity(InputIter first, InputIter last,
             std::input_iterator_tag)
@@ -156,6 +156,22 @@ struct SharedArrayObject {
     void expand(size_type n)
     {
         if (n <= capacity) return;
+
+        change_capacity(n);
+    }
+
+    // 容量をサイズに合わせる
+    void fit()
+    {
+        if (size == 0 || size == capacity) return;
+
+        change_capacity(size);
+    }
+
+    // 容量を指定されたサイズにする
+    void change_capacity(size_type n)
+    {
+        if (n < size || n == capacity) return;
 
         // 削除用オブジェクト
         auto del = [this, n](T* ptr){
@@ -469,6 +485,12 @@ public:
         else if (n > capacity()) {
             p_obj_->expand(n);
         }
+    }
+
+    // 容量をサイズに合わせる
+    void shrink_to_fit()
+    {
+        if (p_obj_) p_obj_->fit();
     }
 
     // スワップ
