@@ -14,15 +14,26 @@ using tork::Array;
 using tork::SharedArray;
 
 namespace {
-	template<class C>
-	void print(const C& a)
-	{
-		cout << "{ ";
-		for (auto v : a) {
-			cout << v << ' ';
-		}
-		cout << "}" << endl;
+
+template<class C>
+void print(const C& a)
+{
+	cout << "{ ";
+	for (auto v : a) {
+		cout << v << ' ';
 	}
+	cout << "}" << endl;
+}
+
+template<class T, class A, template<class, class> class C>
+void print(const C<std::shared_ptr<T>, A>& a)
+{
+	cout << "{ ";
+	for (auto v : a) {
+		cout << *v << ' ';
+	}
+	cout << "}" << endl;
+}
 
 void Test_Array_int()
 {
@@ -180,6 +191,17 @@ void Test_SharedArray_int()
 
 	a4 = { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
 	print(a4);
+
+	{
+		tork::SharedArray<std::shared_ptr<int>> a(10);
+		for (int i = 0; i < 10; ++i) {
+			a[i] = std::make_shared<int>(i);
+		}
+		a.erase(a.begin() + 2);
+		print(a);
+		a.erase(a.begin() + 2, a.end() - 2);
+		print(a);
+	}
 }
 
 } // anonymous namespace

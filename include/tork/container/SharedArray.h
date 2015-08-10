@@ -134,6 +134,39 @@ struct SharedArrayObject {
         size = i;
     }
 
+    // 要素の削除
+    T* erase(T* pos)
+    {
+        if (pos < p_data || p_data + size <= pos) {
+            throw std::out_of_range("out of range at tork::SharedArray");
+        }
+
+        for (T* p = pos; p != &p_data[size - 1]; ++p) {
+            AllocTraits::destroy(alloc, p);
+            AllocTraits::construct(alloc, p, std::move(*(p + 1)));
+        }
+        AllocTraits::destroy(alloc, &p_data[size - 1]);
+        --size;
+        return pos;
+    }
+    T* erase(T* first, T* last)
+    {
+        if (first >= last || last < p_data || p_data + size <= first) {
+            throw std::out_of_range("out of range at tork::SharedArray");
+        }
+
+        size_type d = std::distance(first, last);
+        for (T* p = first; p != &p_data[size - d]; ++p) {
+            AllocTraits::destroy(alloc, p);
+            AllocTraits::construct(alloc, p, std::move(*(p + d)));
+        }
+        for (size_type i = 0; i < d; ++i) {
+            AllocTraits::destroy(alloc, &p_data[size - d + i]);
+        }
+        size -= d;
+        return first;
+    }
+
     // 容量を指定されたサイズに拡張する
     void expand(size_type n)
     {
@@ -408,6 +441,18 @@ public:
         p_obj_->pop_back();
     }
 
+    // 指定された要素の削除
+    iterator erase(iterator pos)
+    {
+        return p_obj_->erase(pos);
+    }
+
+    // 指定された範囲の削除
+    iterator erase(iterator first, iterator last)
+    {
+        return p_obj_->erase(first, last);
+    }
+
     // サイズ変更
     void resize(size_type n)
     {
@@ -415,6 +460,7 @@ public:
         p_obj_->resize(n, T());
     }
 
+    // サイズ変更（埋める値を指定）
     void resize(size_type n, const T& value)
     {
         if (p_obj_ == nullptr) reserve(n);
