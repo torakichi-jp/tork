@@ -135,30 +135,15 @@ struct SharedArrayObject {
     }
 
     // 要素の削除
-    T* erase(T* pos)
-    {
-        if (pos < p_data || p_data + size <= pos) {
-            throw std::out_of_range("out of range at tork::SharedArray");
-        }
-
-        for (T* p = pos; p != &p_data[size - 1]; ++p) {
-            AllocTraits::destroy(alloc, p);
-            AllocTraits::construct(alloc, p, std::move(*(p + 1)));
-        }
-        AllocTraits::destroy(alloc, &p_data[size - 1]);
-        --size;
-        return pos;
-    }
     T* erase(T* first, T* last)
     {
         if (first >= last || last < p_data || p_data + size <= first) {
             throw std::out_of_range("out of range at tork::SharedArray");
         }
 
-        size_type d = std::distance(first, last);
+        size_type d = last - first;
         for (T* p = first; p != &p_data[size - d]; ++p) {
-            AllocTraits::destroy(alloc, p);
-            AllocTraits::construct(alloc, p, std::move(*(p + d)));
+            *p = std::move(*(p + d));
         }
         for (size_type i = 0; i < d; ++i) {
             AllocTraits::destroy(alloc, &p_data[size - d + i]);
@@ -444,7 +429,7 @@ public:
     // 指定された要素の削除
     iterator erase(iterator pos)
     {
-        return p_obj_->erase(pos);
+        return p_obj_->erase(pos, pos + 1);
     }
 
     // 指定された範囲の削除
