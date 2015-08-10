@@ -323,6 +323,32 @@ public:
         if (p_obj_) p_obj_->dec_ref();
     }
 
+    // コピー代入演算子
+    SharedArray& operator =(const SharedArray& x)
+    {
+        if (this->p_obj_ == x.p_obj_) return *this;
+
+        if (p_obj_) p_obj_->dec_ref();
+
+        p_obj_ = x.p_obj_;
+        p_obj_->inc_ref();
+
+        return *this;
+    }
+
+    // ムーブ代入演算子
+    SharedArray& operator =(SharedArray&& x)
+    {
+        if (this->p_obj_ == x.p_obj_) return *this;
+
+        if (p_obj_) p_obj_->dec_ref();
+
+        p_obj_ = x.p_obj_;
+        x.p_obj_ = nullptr;
+
+        return *this;
+    }
+
     // 末尾に追加
     void push_back(const T& value)
     {
