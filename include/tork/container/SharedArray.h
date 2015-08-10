@@ -440,6 +440,12 @@ public:
         }
     }
 
+    // スワップ
+    void swap(SharedArray& x)
+    {
+        std::swap(p_obj_, x.p_obj_);
+    }
+
     // 要素への添え字アクセス
     reference at(size_type i)
     {
