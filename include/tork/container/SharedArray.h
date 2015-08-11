@@ -568,6 +568,12 @@ public:
                 std::iterator_traits<InputIter>::iterator_category());
     }
 
+    // 初期化子リストを挿入
+    iterator insert(iterator pos, std::initializer_list<T> il)
+    {
+        return insert(pos, il.begin(), il.end());
+    }
+
     // 指定された位置に要素を直接構築
     template<class... Args>
     iterator emplace(iterator pos, Args&&... args)

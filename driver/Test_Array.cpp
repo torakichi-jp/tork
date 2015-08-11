@@ -229,6 +229,10 @@ void Test_SharedArray_int()
 		ia.insert(ia.begin() + 2, it, last);
 		print(ia);
 	}
+
+	a7 = { 0, 1, 2, 3 };
+	a7.insert(a7.begin() + 2, { 9, 8, 7, 6 });
+	print(a7);
 }
 
 } // anonymous namespace
