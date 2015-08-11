@@ -215,6 +215,43 @@ struct SharedArrayObject {
         --size;
     }
 
+    // 指定された位置に要素を設定
+    template<class... Args>
+    T* emplace(T* pos, Args&&... args)
+    {
+        if (pos < p_data || p_data + size <= pos) {
+            throw std::out_of_range("out of range at tork::SharedArray");
+        }
+
+        size_type off = pos - p_data;
+        size_type oldsize = size;
+
+        add(std::forward<Args>(args)...);
+        std::rotate(p_data + off, p_data + oldsize, p_data + size);
+
+        return p_data + off;
+    }
+
+    // 要素の挿入
+    T* insert(T* pos, size_type n, const T& value)
+    {
+        if (pos < p_data || p_data + size <= pos) {
+            throw std::out_of_range("out of range at tork::SharedArray");
+        }
+
+        size_type off = pos - p_data;
+        size_type oldsize = size;
+
+        expand(size + n);
+        for (size_type i = 0; i < n; ++i) {
+            AllocTraits::construct(alloc, p_data + size + i, value);
+        }
+        size += n;
+        std::rotate(p_data + off, p_data + oldsize, p_data + size);
+
+        return p_data + off;
+    }
+
     // サイズ変更
     template<class Arg>
     void resize(size_type n, Arg&& value)
@@ -452,6 +489,29 @@ public:
     iterator erase(iterator first, iterator last)
     {
         return p_obj_->erase(first, last);
+    }
+
+    // 指定された位置に要素追加
+    iterator insert(iterator pos, const T& value)
+    {
+        return p_obj_->emplace(pos, value);
+    }
+
+    iterator insert(iterator pos, T&& value)
+    {
+        return p_obj_->emplace(pos, std::move(value));
+    }
+
+    iterator insert(iterator pos, size_type n, const T& value)
+    {
+        return p_obj_->insert(pos, n, value);
+    }
+
+    // 指定された位置に要素を直接構築
+    template<class... Args>
+    iterator emplace(iterator pos, Args&&... args)
+    {
+        return p_obj_->emplace(pos, std::forward<Args>(args)...);
     }
 
     // サイズ変更

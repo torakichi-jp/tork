@@ -207,6 +207,13 @@ void Test_SharedArray_int()
 	a7.reserve(100);
 	a7 = { 0, 1, 2, 3 };
 	a7.shrink_to_fit();
+
+	a7.insert(a7.begin() + 2, 99);
+	print(a7);
+
+	a7 = { 0, 1, 2, 3 };
+	a7.insert(a7.begin() + 2, 4, 123);
+	print(a7);
 }
 
 } // anonymous namespace
