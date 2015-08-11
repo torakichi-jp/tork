@@ -214,6 +214,21 @@ void Test_SharedArray_int()
 	a7 = { 0, 1, 2, 3 };
 	a7.insert(a7.begin() + 2, 4, 123);
 	print(a7);
+
+	a7 = { 0, 1, 2, 3 };
+	v = { 10, 9, 8, 7 };
+	a7.insert(a7.begin() + 2, v.begin(), v.end());
+	print(a7);
+
+	{
+		std::stringstream ss;
+		ss << "10 20 30 40 50 60 70 80 90";
+		std::istream_iterator<int> it(ss);
+		std::istream_iterator<int> last;
+		IntArray ia = { 0, 1, 2, 3 };
+		ia.insert(ia.begin() + 2, it, last);
+		print(ia);
+	}
 }
 
 } // anonymous namespace

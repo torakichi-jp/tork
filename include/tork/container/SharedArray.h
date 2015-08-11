@@ -232,7 +232,7 @@ struct SharedArrayObject {
         return p_data + off;
     }
 
-    // 要素の挿入
+    // 指定された数の要素の挿入
     T* insert(T* pos, size_type n, const T& value)
     {
         if (pos < p_data || p_data + size <= pos) {
@@ -247,6 +247,55 @@ struct SharedArrayObject {
             AllocTraits::construct(alloc, p_data + size + i, value);
         }
         size += n;
+        std::rotate(p_data + off, p_data + oldsize, p_data + size);
+
+        return p_data + off;
+    }
+
+    // 入力イテレータによる範囲の要素を挿入
+    template<class InputIter>
+    T* insert(T* pos, InputIter first, InputIter last, std::input_iterator_tag)
+    {
+        if (pos < p_data || p_data + size <= pos) {
+            throw std::out_of_range("out of range at tork::SharedArray");
+        }
+
+        size_type off = pos - p_data;
+        size_type oldsize = size;
+
+        try {
+            for (auto it = first; it != last; ++it) {
+                add(*it);
+            }
+        }
+        catch (...) {
+            erase(p_data + oldsize, p_data + size);
+            throw;
+        }
+        std::rotate(p_data + off, p_data + oldsize, p_data + size);
+
+        return p_data + off;
+    }
+
+    // 前進イテレータによる範囲の要素を挿入
+    template<class ForwardIter>
+    T* insert(T* pos, ForwardIter first, ForwardIter last, std::forward_iterator_tag)
+    {
+        if (pos < p_data || p_data + size <= pos) {
+            throw std::out_of_range("out of range at tork::SharedArray");
+        }
+
+        size_type off = pos - p_data;
+        size_type oldsize = size;
+        size_type d = std::distance(first, last);
+
+        expand(size + d);
+        size_type i = 0;
+        for (auto it = first; it != last; ++it) {
+            AllocTraits::construct(alloc, p_data + size + i, *it);
+            ++i;
+        }
+        size += d;
         std::rotate(p_data + off, p_data + oldsize, p_data + size);
 
         return p_data + off;
@@ -497,14 +546,26 @@ public:
         return p_obj_->emplace(pos, value);
     }
 
+    // ムーブ挿入
     iterator insert(iterator pos, T&& value)
     {
         return p_obj_->emplace(pos, std::move(value));
     }
 
+    // 指定された数の要素を挿入
     iterator insert(iterator pos, size_type n, const T& value)
     {
         return p_obj_->insert(pos, n, value);
+    }
+
+    // 指定された範囲を挿入
+    template<class InputIter,
+        class = typename std::enable_if<
+            !std::is_integral<InputIter>::value, void>::type>
+    iterator insert(iterator pos, InputIter first, InputIter last)
+    {
+        return p_obj_->insert(pos, first, last,
+                std::iterator_traits<InputIter>::iterator_category());
     }
 
     // 指定された位置に要素を直接構築
