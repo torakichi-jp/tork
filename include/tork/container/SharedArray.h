@@ -49,6 +49,7 @@ struct SharedArrayObject {
     {
         assert(0 < n);
 
+        // アロケータの再束縛
         using traits = AllocTraits::rebind_traits<SharedArrayObject>;
         AllocTraits::rebind_alloc<SharedArrayObject> allocObj = a;
 
@@ -71,6 +72,7 @@ struct SharedArrayObject {
 
         p->clear();
 
+        // アロケータの再束縛
         using traits = AllocTraits::rebind_traits<SharedArrayObject>;
         AllocTraits::rebind_alloc<SharedArrayObject> allocObj = p->alloc;
 
@@ -85,26 +87,31 @@ struct SharedArrayObject {
         auto del = [](SharedArrayObject* ptr){ destroy(ptr); };
         std::iterator_traits<Iter>::iterator_category iter_tag;
 
+        // 構築するサイズを取得（イテレータカテゴリにより変わる）
         size_type n = get_first_capacity(first, last, iter_tag);
 
+        // オブジェクト作成（例外安全のため unique_ptr を使用）
         std::unique_ptr<SharedArrayObject, decltype(del)> p(create(a, n), del);
 
+        // 要素の割り当て
         p->assign(first, last, iter_tag);
 
         return p.release();
     }
 
-    // 構築するサイズ取得（イテレータ型でディスパッチ）
+    // 構築するサイズ取得（イテレータカテゴリでディスパッチ）
     template<class InputIter>
     static size_type get_first_capacity(InputIter first, InputIter last,
             std::input_iterator_tag)
     {
+        // 入力イテレータならとりあえず8個
         return 8;
     }
     template<class ForwardIter>
     static size_type get_first_capacity(ForwardIter first, ForwardIter last,
             std::forward_iterator_tag)
     {
+        // 前進イテレータの場合は first と last の差を返す
         return std::distance(first, last);
     }
 
@@ -114,8 +121,12 @@ struct SharedArrayObject {
     {
         clear();
 
-        for (auto it = first; it != last; ++it) {
+        for (auto it = first; it != last; ++it) try {
             add(*it);
+        }
+        catch (...) {
+            clear();
+            throw;
         }
     }
 
@@ -127,9 +138,15 @@ struct SharedArrayObject {
         expand(std::distance(first, last));
 
         size_type i = 0;
-        for (auto it = first; it != last; ++it) {
+        for (auto it = first; it != last; ++it) try {
             AllocTraits::construct(alloc, &p_data[i], *it);
             ++i;
+        }
+        catch (...) {
+            for (size_type idx = 0; idx < i; ++idx) {
+                AllocTraits::destroy(alloc, &p_data[idx]);
+            }
+            throw;
         }
         size = i;
     }
@@ -142,9 +159,12 @@ struct SharedArrayObject {
         }
 
         size_type d = last - first;
+
+        // 指定された範囲より後ろの要素を前にずらす
         for (T* p = first; p != &p_data[size - d]; ++p) {
             *p = std::move(*(p + d));
         }
+        // ずらした後の要素を削除
         for (size_type i = 0; i < d; ++i) {
             AllocTraits::destroy(alloc, &p_data[size - d + i]);
         }
@@ -185,6 +205,7 @@ struct SharedArrayObject {
         for (size_type i = 0; i < size; ++i) {
             AllocTraits::construct(
                     alloc, &p.get()[i], std::move(p_data[i]));
+            AllocTraits::destroy(alloc, &p_data[i]);
         }
 
         // 古い領域を解放
@@ -199,9 +220,11 @@ struct SharedArrayObject {
     template<class... Args>
     void add(Args&&... args)
     {
+        // 容量が足りなければ拡張する
         if (size == capacity) {
             expand(capacity * 2);
         }
+
         AllocTraits::construct(
                 alloc, &p_data[size], std::forward<Args>(args)...);
         ++size;
@@ -210,7 +233,7 @@ struct SharedArrayObject {
     // 末尾から削除
     void pop_back()
     {
-        assert(size != 0);
+        assert(size > 0);
         AllocTraits::destroy(alloc, &p_data[size - 1]);
         --size;
     }
@@ -219,6 +242,7 @@ struct SharedArrayObject {
     template<class... Args>
     T* emplace(T* pos, Args&&... args)
     {
+        // 範囲チェック
         if (pos < p_data || p_data + size <= pos) {
             throw std::out_of_range("out of range at tork::SharedArray");
         }
@@ -226,6 +250,7 @@ struct SharedArrayObject {
         size_type off = pos - p_data;
         size_type oldsize = size;
 
+        // 後ろに追加してからローテートする
         add(std::forward<Args>(args)...);
         std::rotate(p_data + off, p_data + oldsize, p_data + size);
 
@@ -243,8 +268,14 @@ struct SharedArrayObject {
         size_type oldsize = size;
 
         expand(size + n);
-        for (size_type i = 0; i < n; ++i) {
+        for (size_type i = 0; i < n; ++i) try {
             AllocTraits::construct(alloc, p_data + size + i, value);
+        }
+        catch (...) {
+            for (size_type idx = 0; idx < i; ++idx) {
+                AllocTraits::destroy(alloc, &p_data[size + idx]);
+            }
+            throw;
         }
         size += n;
         std::rotate(p_data + off, p_data + oldsize, p_data + size);
@@ -291,9 +322,15 @@ struct SharedArrayObject {
 
         expand(size + d);
         size_type i = 0;
-        for (auto it = first; it != last; ++it) {
-            AllocTraits::construct(alloc, p_data + size + i, *it);
+        for (auto it = first; it != last; ++it) try {
+            AllocTraits::construct(alloc, &p_data[size + i], *it);
             ++i;
+        }
+        catch (...) {
+            for (size_type idx = 0; idx < i; ++idx) {
+                AllocTraits::destroy(alloc, &p_data[size + idx]);
+            }
+            throw;
         }
         size += d;
         std::rotate(p_data + off, p_data + oldsize, p_data + size);
@@ -305,16 +342,24 @@ struct SharedArrayObject {
     template<class Arg>
     void resize(size_type n, Arg&& value)
     {
+        // 小さくする場合
         if (n < size) {
             while (n < size) {
                 pop_back();
             }
         }
+        // 大きくする場合
         else if (size < n) {
             if (capacity < n) expand(n);
-            for (size_type i = 0; i < n - size; ++i) {
+            for (size_type i = 0; i < n - size; ++i) try {
                 AllocTraits::construct(
                         alloc, &p_data[size + i], std::forward<Arg>(value));
+            }
+            catch (...) {
+                for (size_type idx = 0; idx < i; ++idx) {
+                    AllocTraits::destroy(alloc, &p_data[size + idx]);
+                }
+                throw;
             }
             size = n;
         }
@@ -340,6 +385,8 @@ struct SharedArrayObject {
     // 参照カウンタ減
     void dec_ref()
     {
+        assert(ref_counter > 0);
+
         --ref_counter;
         if (ref_counter == 0) {
             destroy(this);

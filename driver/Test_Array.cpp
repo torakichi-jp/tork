@@ -201,6 +201,7 @@ void Test_SharedArray()
 		print(a);
 		a.erase(a.begin() + 2, a.end() - 2);
 		print(a);
+		a.reserve(20);
 	}
 
 	IntArray a7;
@@ -236,6 +237,8 @@ void Test_SharedArray()
 
 	IntArray a8{ 9, 10, 11, 12, 13 };
 	swap(a7, a8);
+	print(a7);
+	print(a8);
 
 	IntArray x{ 0, 1, 2, 3 };
 	IntArray y{ 0, 1, 2, 3 };
