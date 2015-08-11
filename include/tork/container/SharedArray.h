@@ -712,7 +712,61 @@ public:
 
 };  // class SharedArray
 
+// スワップ
+template<class T, class A>
+void swap(SharedArray<T, A>& x, SharedArray<T, A>& y)
+{
+    x.swap(y);
 }
+
+// 比較演算子
+template<class T, class A>
+bool operator ==(const SharedArray<T, A>& x, const SharedArray<T, A>& y)
+{
+    if (x.size() != y.size()) return false;
+
+    auto itx = x.begin();
+    auto ity = y.begin();
+    while (itx != x.end()) {
+        if (!(*itx == *ity)) return false;
+        ++itx;
+        ++ity;
+    }
+    return true;
+}
+
+template<class T, class A>
+bool operator !=(const SharedArray<T, A>& x, const SharedArray<T, A>& y)
+{
+    return !(x == y);
+}
+
+template<class T, class A>
+bool operator <(const SharedArray<T, A>& x, const SharedArray<T, A>& y)
+{
+    return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());
+}
+
+template<class T, class A>
+bool operator <=(const SharedArray<T, A>& x, const SharedArray<T, A>& y)
+{
+    return !(y < x);
+}
+
+template<class T, class A>
+bool operator >(const SharedArray<T, A>& x, const SharedArray<T, A>& y)
+{
+    return y < x;
+}
+
+template<class T, class A>
+bool operator >=(const SharedArray<T, A>& x, const SharedArray<T, A>& y)
+{
+    return !(x < y);
+}
+
+
+}   // namespace tork
 
 #endif  // TORK_CONTAINER_SHARED_ARRAY_H_INCLUDED
 

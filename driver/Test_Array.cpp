@@ -150,7 +150,7 @@ void Test_SharedArrayObject()
 	Obj::destroy(pObj);
 }
 
-void Test_SharedArray_int()
+void Test_SharedArray()
 {
 	using IntArray = SharedArray<int>;
 
@@ -212,7 +212,7 @@ void Test_SharedArray_int()
 	print(a7);
 
 	a7 = { 0, 1, 2, 3 };
-	a7.insert(a7.begin() + 2, 4, 123);
+	a7.insert(a7.begin() + 2, 4, 999);
 	print(a7);
 
 	a7 = { 0, 1, 2, 3 };
@@ -233,6 +233,18 @@ void Test_SharedArray_int()
 	a7 = { 0, 1, 2, 3 };
 	a7.insert(a7.begin() + 2, { 9, 8, 7, 6 });
 	print(a7);
+
+	IntArray a8{ 9, 10, 11, 12, 13 };
+	swap(a7, a8);
+
+	IntArray x{ 0, 1, 2, 3 };
+	IntArray y{ 0, 1, 2, 3 };
+	IntArray z{ 1, 2, 3 };
+	bool b;
+	b = (x == y);
+	b = (x != z);
+	b = (y < z);
+	b = (x >= z);
 }
 
 } // anonymous namespace
@@ -244,5 +256,5 @@ void Test_Array()
 
 	//Test_SharedArrayObject();
 
-	Test_SharedArray_int();
+	Test_SharedArray();
 }
