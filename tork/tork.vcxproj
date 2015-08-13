@@ -92,6 +92,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\include\tork.h" />
+    <ClInclude Include="..\include\tork\algorithm.h" />
     <ClInclude Include="..\include\tork\app.h" />
     <ClInclude Include="..\include\tork\app\OptionStream.h" />
     <ClInclude Include="..\include\tork\container.h" />

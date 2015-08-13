@@ -93,6 +93,9 @@
     <ClInclude Include="..\include\tork\container\SharedArray.h">
       <Filter>ヘッダー ファイル\tork\container</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\tork\algorithm.h">
+      <Filter>ヘッダー ファイル\tork</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
