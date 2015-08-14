@@ -101,6 +101,7 @@
     <ClInclude Include="..\include\tork\container\Vector.h" />
     <ClInclude Include="..\include\tork\debug.h" />
     <ClInclude Include="..\include\tork\define.h" />
+    <ClInclude Include="..\include\tork\function.h" />
     <ClInclude Include="..\include\tork\memory.h" />
     <ClInclude Include="..\include\tork\memory\allocator.h" />
     <ClInclude Include="..\include\tork\memory\default_deleter.h" />
